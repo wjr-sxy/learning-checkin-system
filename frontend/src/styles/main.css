@@ -1,0 +1,10 @@
+/* 
+  main.css 
+  全局样式入口文件
+  按照功能模块拆分为多个子文件，确保单个文件不超过 1000 行
+*/
+
+@import './variables.css';
+@import './base.css';
+@import './utilities.css';
+@import './components.css';

@@ -1,0 +1,262 @@
+2025-12-24 00:51:11,596 - INFO - Starting Data Migration Process...
+2025-12-24 00:51:11,638 - INFO - Connected to Source and Target Databases.
+2025-12-24 00:51:11,638 - INFO - Starting migration for table: sys_user -> sys_user
+2025-12-24 00:51:11,638 - INFO - Total records to migrate: 20
+2025-12-24 00:51:11,642 - ERROR - Error migrating sys_user: (1054, "Unknown column 'profile_settings' in 'field list'")
+2025-12-24 00:51:11,642 - INFO - Starting migration for table: sys_course -> sys_course
+2025-12-24 00:51:11,643 - INFO - Total records to migrate: 2
+2025-12-24 00:51:11,655 - INFO - Processed 2/2 records for sys_course
+2025-12-24 00:51:11,659 - INFO - Finished migration for sys_course. Total: 2
+2025-12-24 00:51:11,659 - INFO - Starting migration for table: sys_task -> sys_task
+2025-12-24 00:51:11,659 - INFO - Total records to migrate: 2
+2025-12-24 00:51:11,660 - ERROR - Error migrating sys_task: (1054, "Unknown column 'student_id' in 'field list'")
+2025-12-24 00:51:11,661 - INFO - Starting migration for table: sys_checkin -> sys_checkin
+2025-12-24 00:51:11,663 - INFO - Total records to migrate: 9
+2025-12-24 00:51:11,676 - INFO - Processed 9/9 records for sys_checkin
+2025-12-24 00:51:11,676 - INFO - Finished migration for sys_checkin. Total: 9
+2025-12-24 00:51:11,676 - INFO - Starting migration for table: sys_points_record -> sys_points_record
+2025-12-24 00:51:11,678 - INFO - Total records to migrate: 33
+2025-12-24 00:51:11,688 - INFO - Processed 33/33 records for sys_points_record
+2025-12-24 00:51:11,688 - INFO - Finished migration for sys_points_record. Total: 33
+2025-12-24 00:51:11,688 - INFO - Starting migration for table: sys_product -> sys_product
+2025-12-24 00:51:11,690 - INFO - Total records to migrate: 41
+2025-12-24 00:51:11,705 - INFO - Processed 41/41 records for sys_product
+2025-12-24 00:51:11,705 - INFO - Finished migration for sys_product. Total: 41
+2025-12-24 00:51:11,705 - INFO - Starting migration for table: sys_order -> sys_order
+2025-12-24 00:51:11,707 - INFO - Total records to migrate: 13
+2025-12-24 00:51:11,720 - INFO - Processed 13/13 records for sys_order
+2025-12-24 00:51:11,720 - INFO - Finished migration for sys_order. Total: 13
+2025-12-24 00:51:11,720 - INFO - Starting migration for table: sys_user_item -> sys_user_item
+2025-12-24 00:51:11,721 - INFO - Table sys_user_item is empty. Skipping.
+2025-12-24 00:51:11,721 - INFO - Starting migration for table: sys_friendship -> sys_friendship
+2025-12-24 00:51:11,724 - INFO - Total records to migrate: 1
+2025-12-24 00:51:11,726 - ERROR - Error migrating sys_friendship: (1054, "Unknown column 'status' in 'field list'")
+2025-12-24 00:51:11,726 - INFO - Starting migration for table: sys_friend_request -> sys_friend_request
+2025-12-24 00:51:11,727 - INFO - Table sys_friend_request is empty. Skipping.
+2025-12-24 00:51:11,727 - INFO - Starting migration for table: sys_course_student -> sys_course_student
+2025-12-24 00:51:11,727 - INFO - Total records to migrate: 2
+2025-12-24 00:51:11,740 - INFO - Processed 2/2 records for sys_course_student
+2025-12-24 00:51:11,740 - INFO - Finished migration for sys_course_student. Total: 2
+2025-12-24 00:51:11,740 - INFO - Starting migration for table: sys_study_plan -> sys_study_plan
+2025-12-24 00:51:11,742 - INFO - Total records to migrate: 7
+2025-12-24 00:51:11,766 - INFO - Processed 7/7 records for sys_study_plan
+2025-12-24 00:51:11,766 - INFO - Finished migration for sys_study_plan. Total: 7
+2025-12-24 00:51:11,766 - INFO - Starting migration for table: sys_study_plan_task -> sys_study_plan_task
+2025-12-24 00:51:11,767 - INFO - Total records to migrate: 2
+2025-12-24 00:51:11,768 - ERROR - Error migrating sys_study_plan_task: (1054, "Unknown column 'content' in 'field list'")
+2025-12-24 00:51:11,768 - INFO - Starting migration for table: sys_study_plan_progress_history -> sys_study_plan_progress_history
+2025-12-24 00:51:11,769 - INFO - Total records to migrate: 6
+2025-12-24 00:51:11,782 - INFO - Processed 6/6 records for sys_study_plan_progress_history
+2025-12-24 00:51:11,783 - INFO - Finished migration for sys_study_plan_progress_history. Total: 6
+2025-12-24 00:51:11,783 - INFO - Starting migration for table: sys_task_submission -> sys_task_submission
+2025-12-24 00:51:11,784 - INFO - Total records to migrate: 6
+2025-12-24 00:51:11,796 - INFO - Processed 6/6 records for sys_task_submission
+2025-12-24 00:51:11,796 - INFO - Finished migration for sys_task_submission. Total: 6
+2025-12-24 00:51:11,796 - INFO - Starting migration for table: sys_task_checkin -> sys_task_checkin
+2025-12-24 00:51:11,798 - INFO - Total records to migrate: 4
+2025-12-24 00:51:11,810 - INFO - Processed 4/4 records for sys_task_checkin
+2025-12-24 00:51:11,811 - INFO - Finished migration for sys_task_checkin. Total: 4
+2025-12-24 00:51:11,811 - INFO - Starting migration for table: sys_daily_online_stats -> sys_daily_online_stats
+2025-12-24 00:51:11,816 - INFO - Total records to migrate: 22
+2025-12-24 00:51:11,829 - INFO - Processed 22/22 records for sys_daily_online_stats
+2025-12-24 00:51:11,830 - INFO - Finished migration for sys_daily_online_stats. Total: 22
+2025-12-24 00:51:11,830 - INFO - Starting migration for table: sys_task_submission_history -> sys_task_submission_history
+2025-12-24 00:51:11,832 - INFO - Table sys_task_submission_history is empty. Skipping.
+2025-12-24 00:51:11,832 - INFO - Starting migration for merged logs (sys_log)
+2025-12-24 00:51:11,833 - INFO - Migrating sys_login_log -> sys_log (LOGIN)
+2025-12-24 00:51:11,853 - INFO - Migrating sys_operation_log -> sys_log (OPERATION)
+2025-12-24 00:51:11,874 - INFO - Migrating sys_sensitive_log -> sys_log (SENSITIVE)
+2025-12-24 00:51:11,875 - INFO - Starting migration for notices (sys_notice)
+2025-12-24 00:51:11,876 - INFO - Migrating sys_notification -> sys_notice (NOTIFICATION)
+2025-12-24 00:51:11,876 - INFO - Migrating sys_announcement -> sys_notice (ANNOUNCEMENT)
+2025-12-24 00:51:11,890 - INFO - Migrating sys_points_rule -> sys_config
+2025-12-24 00:51:11,931 - INFO - Migrated 3 point rules.
+2025-12-24 00:51:11,931 - INFO - Verifying migration...
+2025-12-24 00:51:11,932 - INFO - Table sys_user: Source=20, Target=5 [MISMATCH]
+2025-12-24 00:51:11,934 - INFO - Table sys_course: Source=2, Target=2 [MATCH]
+2025-12-24 00:51:11,935 - INFO - Table sys_task: Source=2, Target=0 [MISMATCH]
+2025-12-24 00:51:11,935 - INFO - Table sys_checkin: Source=9, Target=9 [MATCH]
+2025-12-24 00:51:11,937 - INFO - Table sys_points_record: Source=33, Target=33 [MATCH]
+2025-12-24 00:51:11,940 - INFO - Table sys_product: Source=41, Target=41 [MATCH]
+2025-12-24 00:51:11,941 - INFO - Table sys_order: Source=13, Target=13 [MATCH]
+2025-12-24 00:51:11,942 - WARNING - Could not verify sys_user_item: (1146, "Table 'learning_checkin_optimized.sys_user_item' doesn't exist")
+2025-12-24 00:51:11,943 - INFO - Table sys_friendship: Source=1, Target=0 [MISMATCH]
+2025-12-24 00:51:11,944 - INFO - Table sys_friend_request: Source=0, Target=0 [MATCH]
+2025-12-24 00:51:11,945 - INFO - Table sys_course_student: Source=2, Target=2 [MATCH]
+2025-12-24 00:51:11,947 - INFO - Table sys_study_plan: Source=7, Target=7 [MATCH]
+2025-12-24 00:51:11,948 - INFO - Table sys_study_plan_task: Source=2, Target=0 [MISMATCH]
+2025-12-24 00:51:11,950 - INFO - Table sys_study_plan_progress_history: Source=6, Target=6 [MATCH]
+2025-12-24 00:51:11,950 - INFO - Table sys_task_submission: Source=6, Target=6 [MATCH]
+2025-12-24 00:51:11,951 - INFO - Table sys_task_checkin: Source=4, Target=4 [MATCH]
+2025-12-24 00:51:11,952 - INFO - Table sys_daily_online_stats: Source=22, Target=22 [MATCH]
+2025-12-24 00:51:11,952 - INFO - Migration completed in 0.36 seconds.
+2025-12-24 00:55:51,725 - INFO - Starting Data Migration Process...
+2025-12-24 00:55:51,746 - INFO - Connected to Source and Target Databases.
+2025-12-24 00:55:51,746 - INFO - Starting migration for table: sys_user -> sys_user
+2025-12-24 00:55:51,747 - INFO - Total records to migrate: 20
+2025-12-24 00:55:51,805 - INFO - Processed 20/20 records for sys_user
+2025-12-24 00:55:51,805 - INFO - Finished migration for sys_user. Total: 20
+2025-12-24 00:55:51,805 - INFO - Starting migration for table: sys_course -> sys_course
+2025-12-24 00:55:51,807 - INFO - Total records to migrate: 2
+2025-12-24 00:55:51,809 - INFO - Processed 2/2 records for sys_course
+2025-12-24 00:55:51,810 - INFO - Finished migration for sys_course. Total: 2
+2025-12-24 00:55:51,810 - INFO - Starting migration for table: sys_task -> sys_task
+2025-12-24 00:55:51,810 - INFO - Total records to migrate: 2
+2025-12-24 00:55:51,825 - INFO - Processed 2/2 records for sys_task
+2025-12-24 00:55:51,825 - INFO - Finished migration for sys_task. Total: 2
+2025-12-24 00:55:51,825 - INFO - Starting migration for table: sys_checkin -> sys_checkin
+2025-12-24 00:55:51,826 - INFO - Total records to migrate: 9
+2025-12-24 00:55:51,829 - INFO - Processed 9/9 records for sys_checkin
+2025-12-24 00:55:51,829 - INFO - Finished migration for sys_checkin. Total: 9
+2025-12-24 00:55:51,829 - INFO - Starting migration for table: sys_points_record -> sys_points_record
+2025-12-24 00:55:51,831 - INFO - Total records to migrate: 33
+2025-12-24 00:55:51,835 - INFO - Processed 33/33 records for sys_points_record
+2025-12-24 00:55:51,835 - INFO - Finished migration for sys_points_record. Total: 33
+2025-12-24 00:55:51,835 - INFO - Starting migration for table: sys_product -> sys_product
+2025-12-24 00:55:51,836 - INFO - Total records to migrate: 41
+2025-12-24 00:55:51,840 - INFO - Processed 41/41 records for sys_product
+2025-12-24 00:55:51,840 - INFO - Finished migration for sys_product. Total: 41
+2025-12-24 00:55:51,841 - INFO - Starting migration for table: sys_order -> sys_order
+2025-12-24 00:55:51,842 - INFO - Total records to migrate: 13
+2025-12-24 00:55:51,846 - INFO - Processed 13/13 records for sys_order
+2025-12-24 00:55:51,846 - INFO - Finished migration for sys_order. Total: 13
+2025-12-24 00:55:51,846 - INFO - Starting migration for table: sys_friendship -> sys_friendship
+2025-12-24 00:55:51,847 - INFO - Total records to migrate: 1
+2025-12-24 00:55:51,858 - INFO - Processed 1/1 records for sys_friendship
+2025-12-24 00:55:51,858 - INFO - Finished migration for sys_friendship. Total: 1
+2025-12-24 00:55:51,858 - INFO - Starting migration for table: sys_friend_request -> sys_friend_request
+2025-12-24 00:55:51,859 - INFO - Table sys_friend_request is empty. Skipping.
+2025-12-24 00:55:51,859 - INFO - Starting migration for table: sys_course_student -> sys_course_student
+2025-12-24 00:55:51,860 - INFO - Total records to migrate: 2
+2025-12-24 00:55:51,862 - INFO - Processed 2/2 records for sys_course_student
+2025-12-24 00:55:51,863 - INFO - Finished migration for sys_course_student. Total: 2
+2025-12-24 00:55:51,863 - INFO - Starting migration for table: sys_study_plan -> sys_study_plan
+2025-12-24 00:55:51,864 - INFO - Total records to migrate: 7
+2025-12-24 00:55:51,868 - INFO - Processed 7/7 records for sys_study_plan
+2025-12-24 00:55:51,868 - INFO - Finished migration for sys_study_plan. Total: 7
+2025-12-24 00:55:51,868 - INFO - Starting migration for table: sys_study_plan_progress_history -> sys_study_plan_progress_history
+2025-12-24 00:55:51,869 - INFO - Total records to migrate: 6
+2025-12-24 00:55:51,872 - INFO - Processed 6/6 records for sys_study_plan_progress_history
+2025-12-24 00:55:51,873 - INFO - Finished migration for sys_study_plan_progress_history. Total: 6
+2025-12-24 00:55:51,873 - INFO - Starting migration for table: sys_task_submission -> sys_task_submission
+2025-12-24 00:55:51,873 - INFO - Total records to migrate: 6
+2025-12-24 00:55:51,877 - INFO - Processed 6/6 records for sys_task_submission
+2025-12-24 00:55:51,878 - INFO - Finished migration for sys_task_submission. Total: 6
+2025-12-24 00:55:51,878 - INFO - Starting migration for table: sys_task_checkin -> sys_task_checkin
+2025-12-24 00:55:51,878 - INFO - Total records to migrate: 4
+2025-12-24 00:55:51,882 - INFO - Processed 4/4 records for sys_task_checkin
+2025-12-24 00:55:51,882 - INFO - Finished migration for sys_task_checkin. Total: 4
+2025-12-24 00:55:51,882 - INFO - Starting migration for sys_study_plan_task
+2025-12-24 00:55:51,895 - INFO - Processed 2 records for sys_study_plan_task
+2025-12-24 00:55:51,896 - INFO - Finished migration for sys_study_plan_task. Total: 2
+2025-12-24 00:55:51,896 - INFO - Starting migration for merged logs (sys_log)
+2025-12-24 00:55:51,896 - INFO - Migrating sys_login_log -> sys_log (LOGIN)
+2025-12-24 00:55:51,920 - INFO - Migrating sys_operation_log -> sys_log (OPERATION)
+2025-12-24 00:55:51,934 - INFO - Migrating sys_sensitive_log -> sys_log (SENSITIVE)
+2025-12-24 00:55:51,935 - INFO - Starting migration for notices (sys_notice)
+2025-12-24 00:55:51,936 - INFO - Migrating sys_notification -> sys_notice (NOTIFICATION)
+2025-12-24 00:55:51,937 - INFO - Migrating sys_announcement -> sys_notice (ANNOUNCEMENT)
+2025-12-24 00:55:51,950 - INFO - Migrating sys_points_rule -> sys_config
+2025-12-24 00:55:51,987 - INFO - Migrated 3 point rules.
+2025-12-24 00:55:51,988 - INFO - Verifying migration...
+2025-12-24 00:55:51,989 - INFO - Table sys_user: Source=20, Target=21 [MATCH]
+2025-12-24 00:55:51,991 - INFO - Table sys_course: Source=2, Target=2 [MATCH]
+2025-12-24 00:55:51,991 - INFO - Table sys_task: Source=2, Target=2 [MATCH]
+2025-12-24 00:55:51,992 - INFO - Table sys_checkin: Source=9, Target=9 [MATCH]
+2025-12-24 00:55:51,993 - INFO - Table sys_points_record: Source=33, Target=33 [MATCH]
+2025-12-24 00:55:51,994 - INFO - Table sys_product: Source=41, Target=41 [MATCH]
+2025-12-24 00:55:51,995 - INFO - Table sys_order: Source=13, Target=13 [MATCH]
+2025-12-24 00:55:51,996 - INFO - Table sys_friendship: Source=1, Target=1 [MATCH]
+2025-12-24 00:55:51,996 - INFO - Table sys_friend_request: Source=0, Target=0 [MATCH]
+2025-12-24 00:55:51,997 - INFO - Table sys_course_student: Source=2, Target=2 [MATCH]
+2025-12-24 00:55:51,999 - INFO - Table sys_study_plan: Source=7, Target=7 [MATCH]
+2025-12-24 00:55:52,000 - INFO - Table sys_study_plan_task: Source=2, Target=2 [MATCH]
+2025-12-24 00:55:52,000 - INFO - Table sys_study_plan_progress_history: Source=6, Target=6 [MATCH]
+2025-12-24 00:55:52,001 - INFO - Table sys_task_submission: Source=6, Target=6 [MATCH]
+2025-12-24 00:55:52,001 - INFO - Table sys_task_checkin: Source=4, Target=4 [MATCH]
+2025-12-24 00:55:52,002 - INFO - Migration completed in 0.28 seconds.
+2025-12-24 00:57:08,824 - INFO - Starting Data Migration Process...
+2025-12-24 00:57:08,851 - INFO - Connected to Source and Target Databases.
+2025-12-24 00:57:08,856 - INFO - Starting migration for table: sys_user -> sys_user
+2025-12-24 00:57:08,858 - INFO - Total records to migrate: 20
+2025-12-24 00:57:08,872 - INFO - Processed 20/20 records for sys_user
+2025-12-24 00:57:08,875 - INFO - Finished migration for sys_user. Total: 20
+2025-12-24 00:57:08,876 - INFO - Starting migration for table: sys_course -> sys_course
+2025-12-24 00:57:08,878 - INFO - Total records to migrate: 2
+2025-12-24 00:57:08,883 - INFO - Processed 2/2 records for sys_course
+2025-12-24 00:57:08,884 - INFO - Finished migration for sys_course. Total: 2
+2025-12-24 00:57:08,885 - INFO - Starting migration for table: sys_task -> sys_task
+2025-12-24 00:57:08,886 - INFO - Total records to migrate: 2
+2025-12-24 00:57:08,890 - INFO - Processed 2/2 records for sys_task
+2025-12-24 00:57:08,890 - INFO - Finished migration for sys_task. Total: 2
+2025-12-24 00:57:08,890 - INFO - Starting migration for table: sys_checkin -> sys_checkin
+2025-12-24 00:57:08,891 - INFO - Total records to migrate: 9
+2025-12-24 00:57:08,897 - INFO - Processed 9/9 records for sys_checkin
+2025-12-24 00:57:08,904 - INFO - Finished migration for sys_checkin. Total: 9
+2025-12-24 00:57:08,904 - INFO - Starting migration for table: sys_points_record -> sys_points_record
+2025-12-24 00:57:08,906 - INFO - Total records to migrate: 33
+2025-12-24 00:57:08,916 - INFO - Processed 33/33 records for sys_points_record
+2025-12-24 00:57:08,919 - INFO - Finished migration for sys_points_record. Total: 33
+2025-12-24 00:57:08,920 - INFO - Starting migration for table: sys_product -> sys_product
+2025-12-24 00:57:08,924 - INFO - Total records to migrate: 41
+2025-12-24 00:57:08,931 - INFO - Processed 41/41 records for sys_product
+2025-12-24 00:57:08,931 - INFO - Finished migration for sys_product. Total: 41
+2025-12-24 00:57:08,931 - INFO - Starting migration for table: sys_order -> sys_order
+2025-12-24 00:57:08,933 - INFO - Total records to migrate: 13
+2025-12-24 00:57:08,938 - INFO - Processed 13/13 records for sys_order
+2025-12-24 00:57:08,938 - INFO - Finished migration for sys_order. Total: 13
+2025-12-24 00:57:08,938 - INFO - Starting migration for table: sys_friendship -> sys_friendship
+2025-12-24 00:57:08,939 - INFO - Total records to migrate: 1
+2025-12-24 00:57:08,945 - INFO - Processed 1/1 records for sys_friendship
+2025-12-24 00:57:08,946 - INFO - Finished migration for sys_friendship. Total: 1
+2025-12-24 00:57:08,946 - INFO - Starting migration for table: sys_friend_request -> sys_friend_request
+2025-12-24 00:57:08,947 - INFO - Table sys_friend_request is empty. Skipping.
+2025-12-24 00:57:08,948 - INFO - Starting migration for table: sys_course_student -> sys_course_student
+2025-12-24 00:57:08,949 - INFO - Total records to migrate: 2
+2025-12-24 00:57:08,957 - INFO - Processed 2/2 records for sys_course_student
+2025-12-24 00:57:08,961 - INFO - Finished migration for sys_course_student. Total: 2
+2025-12-24 00:57:08,961 - INFO - Starting migration for table: sys_study_plan -> sys_study_plan
+2025-12-24 00:57:08,963 - INFO - Total records to migrate: 7
+2025-12-24 00:57:08,967 - INFO - Processed 7/7 records for sys_study_plan
+2025-12-24 00:57:08,968 - INFO - Finished migration for sys_study_plan. Total: 7
+2025-12-24 00:57:08,968 - INFO - Starting migration for table: sys_study_plan_progress_history -> sys_study_plan_progress_history
+2025-12-24 00:57:08,969 - INFO - Total records to migrate: 6
+2025-12-24 00:57:08,973 - INFO - Processed 6/6 records for sys_study_plan_progress_history
+2025-12-24 00:57:08,973 - INFO - Finished migration for sys_study_plan_progress_history. Total: 6
+2025-12-24 00:57:08,974 - INFO - Starting migration for table: sys_task_submission -> sys_task_submission
+2025-12-24 00:57:08,975 - INFO - Total records to migrate: 6
+2025-12-24 00:57:08,979 - INFO - Processed 6/6 records for sys_task_submission
+2025-12-24 00:57:08,980 - INFO - Finished migration for sys_task_submission. Total: 6
+2025-12-24 00:57:08,980 - INFO - Starting migration for table: sys_task_checkin -> sys_task_checkin
+2025-12-24 00:57:08,981 - INFO - Total records to migrate: 4
+2025-12-24 00:57:08,985 - INFO - Processed 4/4 records for sys_task_checkin
+2025-12-24 00:57:08,986 - INFO - Finished migration for sys_task_checkin. Total: 4
+2025-12-24 00:57:08,986 - INFO - Starting migration for sys_study_plan_task
+2025-12-24 00:57:08,988 - INFO - Processed 2 records for sys_study_plan_task
+2025-12-24 00:57:08,988 - INFO - Finished migration for sys_study_plan_task. Total: 2
+2025-12-24 00:57:08,989 - INFO - Starting migration for merged logs (sys_log)
+2025-12-24 00:57:08,989 - INFO - Migrating sys_login_log -> sys_log (LOGIN)
+2025-12-24 00:57:09,016 - INFO - Migrating sys_operation_log -> sys_log (OPERATION)
+2025-12-24 00:57:09,027 - INFO - Migrating sys_sensitive_log -> sys_log (SENSITIVE)
+2025-12-24 00:57:09,028 - INFO - Starting migration for notices (sys_notice)
+2025-12-24 00:57:09,029 - INFO - Migrating sys_notification -> sys_notice (NOTIFICATION)
+2025-12-24 00:57:09,030 - INFO - Migrating sys_announcement -> sys_notice (ANNOUNCEMENT)
+2025-12-24 00:57:09,041 - INFO - Migrating sys_points_rule -> sys_config
+2025-12-24 00:57:09,057 - INFO - Migrated 3 point rules.
+2025-12-24 00:57:09,057 - INFO - Verifying migration...
+2025-12-24 00:57:09,058 - INFO - Table sys_user: Source=20, Target=21 [MATCH]
+2025-12-24 00:57:09,060 - INFO - Table sys_course: Source=2, Target=2 [MATCH]
+2025-12-24 00:57:09,062 - INFO - Table sys_task: Source=2, Target=2 [MATCH]
+2025-12-24 00:57:09,063 - INFO - Table sys_checkin: Source=9, Target=9 [MATCH]
+2025-12-24 00:57:09,065 - INFO - Table sys_points_record: Source=33, Target=33 [MATCH]
+2025-12-24 00:57:09,067 - INFO - Table sys_product: Source=41, Target=41 [MATCH]
+2025-12-24 00:57:09,069 - INFO - Table sys_order: Source=13, Target=13 [MATCH]
+2025-12-24 00:57:09,070 - INFO - Table sys_friendship: Source=1, Target=1 [MATCH]
+2025-12-24 00:57:09,072 - INFO - Table sys_friend_request: Source=0, Target=0 [MATCH]
+2025-12-24 00:57:09,073 - INFO - Table sys_course_student: Source=2, Target=2 [MATCH]
+2025-12-24 00:57:09,076 - INFO - Table sys_study_plan: Source=7, Target=7 [MATCH]
+2025-12-24 00:57:09,077 - INFO - Table sys_study_plan_task: Source=2, Target=2 [MATCH]
+2025-12-24 00:57:09,079 - INFO - Table sys_study_plan_progress_history: Source=6, Target=6 [MATCH]
+2025-12-24 00:57:09,080 - INFO - Table sys_task_submission: Source=6, Target=6 [MATCH]
+2025-12-24 00:57:09,081 - INFO - Table sys_task_checkin: Source=4, Target=4 [MATCH]
+2025-12-24 00:57:09,082 - INFO - Migration completed in 0.26 seconds.

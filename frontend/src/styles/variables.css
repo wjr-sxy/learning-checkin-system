@@ -1,0 +1,69 @@
+/* Color System */
+:root {
+  /* Primary Color System - Blue Gradient Series */
+  --primary-color: #409EFF;
+  --primary-color-light: #66B1FF;
+  --primary-color-lighter: #91CAFF;
+  --primary-color-lightest: #C6E2FF;
+  --primary-color-dark: #337ECC;
+  --primary-color-darker: #266699;
+  
+  /* Role-specific Theme Colors */
+  --student-theme: linear-gradient(135deg, #409EFF 0%, #66B1FF 100%);
+  --teacher-theme: linear-gradient(135deg, #67C23A 0%, #85CE61 100%);
+  --admin-theme: linear-gradient(135deg, #9C27B0 0%, #BA68C8 100%); /* Changed to Purple */
+  
+  /* Extended Color Palette */
+  --success-color: #67C23A;
+  --success-color-light: #85CE61;
+  --warning-color: #E6A23C;
+  --warning-color-light: #F0C16E;
+  --danger-color: #F56C6C;
+  --danger-color-light: #F78989;
+  --info-color: #909399;
+  --info-color-light: #A6A9AD;
+  
+  /* Text Colors */
+  --text-primary: #1D2129;
+  --text-regular: #4E5969;
+  --text-secondary: #86909C;
+  --text-placeholder: #C9CDD4;
+  
+  /* Border Colors */
+  --border-color-base: #DCDFE6;
+  --border-color-light: #E4E7ED;
+  --border-color-lighter: #EBEEF5;
+  --border-color-extra-light: #F2F6FC;
+  
+  /* Background Colors */
+  --bg-color-base: #F5F7FA;
+  --bg-color-white: #FFFFFF;
+  --bg-color-gradient: linear-gradient(135deg, #F5F7FA 0%, #E8ECF1 100%);
+  --bg-color-card: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+  --login-bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  /* Shadow Colors */
+  --shadow-color-light: rgba(0, 0, 0, 0.05);
+  --shadow-color-base: rgba(0, 0, 0, 0.1);
+  --shadow-color-dark: rgba(0, 0, 0, 0.15);
+
+  /* Element Plus Overrides */
+  --el-color-primary: var(--primary-color);
+  --el-color-success: var(--success-color);
+  --el-color-warning: var(--warning-color);
+  --el-color-danger: var(--danger-color);
+  --el-color-info: var(--info-color);
+  
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-regular);
+  --el-text-color-secondary: var(--text-secondary);
+  --el-text-color-placeholder: var(--text-placeholder);
+  
+  --el-border-color: var(--border-color-base);
+  --el-border-color-light: var(--border-color-light);
+  --el-border-color-lighter: var(--border-color-lighter);
+  --el-border-color-extra-light: var(--border-color-extra-light);
+  
+  --el-bg-color: var(--bg-color-white);
+  --el-bg-color-page: var(--bg-color-base);
+}
