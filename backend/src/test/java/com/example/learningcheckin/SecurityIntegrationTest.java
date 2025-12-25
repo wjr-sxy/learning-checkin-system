@@ -43,6 +43,7 @@ public class SecurityIntegrationTest {
     private String studentToken;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() throws Exception {
         // Register & Login Student
         String sName = "student_" + UUID.randomUUID().toString().substring(0, 6);
@@ -104,6 +105,7 @@ public class SecurityIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testTeacherCanCreateCourse() throws Exception {
         // Register & Login Teacher
         String tName = "teacher_" + UUID.randomUUID().toString().substring(0, 6);

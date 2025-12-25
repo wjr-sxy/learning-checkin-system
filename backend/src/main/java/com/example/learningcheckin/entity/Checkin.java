@@ -17,5 +17,6 @@ public class Checkin {
     private LocalDateTime checkinTime;
     private Integer studyDuration;
     private Boolean isSupplementary;
+    private String ipAddress;
     private LocalDateTime createTime;
 }

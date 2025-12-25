@@ -6,13 +6,16 @@ import com.example.learningcheckin.entity.User;
 import com.example.learningcheckin.mapper.PointsRecordMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Component
@@ -23,6 +26,48 @@ public class RankingScheduler {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+    private static final String REDIS_KEY_DAILY_RANKING = "ranking:daily";
+    private static final String REDIS_KEY_WEEKLY_RANKING = "ranking:weekly";
+
+    // Run every 5 minutes to sync Redis
+    @Scheduled(fixedRate = 300000)
+    public void syncRankingToRedis() {
+        // Daily Ranking
+        LocalDateTime startOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+        List<RankingDTO> dailyList = pointsRecordMapper.selectRanking(startOfDay, 100);
+        
+        // Clear old key? Or just add? ZAdd updates score if member exists.
+        // To be clean, we might want to expire or delete, but simple ZADD is fine for continuous updates.
+        // But if someone's score drops or they disappear (unlikely), they might remain.
+        // For accurate "Top 100", we should probably replace the key content.
+        // Strategy: Delete and Re-add is safest for consistency, but not atomic.
+        // Better: Add all, then remove range outside 0-99.
+        
+        redisTemplate.delete(REDIS_KEY_DAILY_RANKING);
+        for (RankingDTO dto : dailyList) {
+            // ZSet stores score as double. We use score as score. Member is userId.
+            redisTemplate.opsForZSet().add(REDIS_KEY_DAILY_RANKING, dto.getUserId().toString(), dto.getScore());
+            // Store extra info (username, avatar) in a Hash or just cache user info separately?
+            // Controller will need to fetch User info. 
+            // Optimization: Store "userId:username:avatar" as member? No, ID is better for uniqueness.
+            // We'll fetch user details in Controller from DB/Cache based on IDs from ZSet.
+        }
+        // Set Expiration to avoid stale data if scheduler stops? 1 hour?
+        // redisTemplate.expire(REDIS_KEY_DAILY_RANKING, 1, TimeUnit.HOURS);
+
+        // Weekly Ranking
+        LocalDateTime startOfWeek = LocalDateTime.of(LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)), LocalTime.MIN);
+        List<RankingDTO> weeklyList = pointsRecordMapper.selectRanking(startOfWeek, 100);
+        
+        redisTemplate.delete(REDIS_KEY_WEEKLY_RANKING);
+        for (RankingDTO dto : weeklyList) {
+            redisTemplate.opsForZSet().add(REDIS_KEY_WEEKLY_RANKING, dto.getUserId().toString(), dto.getScore());
+        }
+    }
 
     // Run at 00:00:00 every day
     @Scheduled(cron = "0 0 0 * * ?")

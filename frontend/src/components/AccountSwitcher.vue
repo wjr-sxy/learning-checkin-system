@@ -1,7 +1,10 @@
 <template>
   <el-dropdown trigger="click" @command="handleCommand">
     <span class="el-dropdown-link account-switcher">
-      <el-avatar :size="32" :src="userStore.user?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" class="mr-2" />
+      <div class="avatar-wrapper mr-2">
+        <el-avatar :size="32" :src="userStore.user?.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
+        <img v-if="userStore.user?.currentAvatarFrame" :src="userStore.user.currentAvatarFrame" class="avatar-frame" />
+      </div>
       <span class="username mr-1">{{ userStore.user?.username }}</span>
       <el-tag size="small" effect="plain" class="role-badge mr-1">{{ formatRole(userStore.user?.role) }}</el-tag>
       <el-icon class="el-icon--right"><arrow-down /></el-icon>
@@ -102,6 +105,23 @@ const handleLogout = () => {
   padding: 4px 8px;
   border-radius: 4px;
   transition: background-color 0.2s;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-frame {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  z-index: 10;
+  pointer-events: none;
 }
 .account-switcher:hover {
     background-color: rgba(0,0,0,0.05);

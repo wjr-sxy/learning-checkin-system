@@ -27,4 +27,5 @@ public class StudyPlan {
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private Boolean isPointEligible;
+    private Integer rewardPoints;
 }

@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeRequests()
-            .antMatchers("/api/auth/**", "/api/public/**", "/v2/api-docs", "/swagger-resources/**", "/webjars/**", "/swagger-ui.html").permitAll()
+            .antMatchers("/api/auth/**", "/api/public/**", "/v2/api-docs", "/swagger-resources/**", "/webjars/**", "/swagger-ui.html", "/ws/**").permitAll()
             .antMatchers("/api/admin/**").hasRole("ADMIN")
             .antMatchers("/api/course/create").hasAnyRole("TEACHER", "ADMIN")
             .antMatchers("/api/tasks/create").hasAnyRole("TEACHER", "ADMIN")

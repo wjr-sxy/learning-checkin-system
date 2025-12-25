@@ -14,6 +14,7 @@ public interface IStudyPlanService extends IService<StudyPlan> {
     void deletePlan(Long planId);
     void completePlan(Long planId);
     StudyPlan updateProgress(Long planId, Integer completedTasks, Integer totalTasks, String note);
+    void updateAllPlansProgress(Long userId);
     List<StudyPlanProgressHistory> getProgressHistory(Long planId);
     
     // Task related

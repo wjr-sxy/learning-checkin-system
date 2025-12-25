@@ -176,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, computed } from 'vue'
 import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
 import { Coin, List, Calendar, Shop, Trophy, Plus, User } from '@element-plus/icons-vue'
@@ -190,6 +190,7 @@ const userStore = useUserStore()
 const router = useRouter()
 const joinDialogVisible = ref(false)
 const joinFormRef = ref<FormInstance>()
+let timer: ReturnType<typeof setInterval> | null = null
 
 // Online Time
 const formattedTodayOnline = computed(() => {

@@ -2,28 +2,19 @@ package com.example.learningcheckin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.learningcheckin.entity.PointsRecord;
-import com.example.learningcheckin.entity.StudyPlan;
-import com.example.learningcheckin.entity.StudyPlanProgressHistory;
-import com.example.learningcheckin.entity.User;
-import com.example.learningcheckin.mapper.PointsRecordMapper;
-import com.example.learningcheckin.mapper.StudyPlanMapper;
-import com.example.learningcheckin.mapper.StudyPlanProgressHistoryMapper;
-import com.example.learningcheckin.mapper.StudyPlanTaskMapper;
-import com.example.learningcheckin.mapper.UserMapper;
+import com.example.learningcheckin.entity.*;
+import com.example.learningcheckin.mapper.*;
 import com.example.learningcheckin.service.IStudyPlanService;
-import com.example.learningcheckin.entity.StudyPlanTask;
+import com.example.learningcheckin.service.IPointsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.example.learningcheckin.entity.CourseStudent;
-import com.example.learningcheckin.mapper.CourseStudentMapper;
 
 @Service
 public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan> implements IStudyPlanService {
@@ -33,6 +24,9 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
 
     @Autowired
     private PointsRecordMapper pointsRecordMapper;
+    
+    @Autowired
+    private IPointsService pointsService;
 
     @Autowired
     private StudyPlanProgressHistoryMapper historyMapper;
@@ -42,6 +36,9 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
 
     @Autowired
     private CourseStudentMapper courseStudentMapper;
+    
+    @Autowired
+    private com.example.learningcheckin.mapper.CheckinMapper checkinMapper;
 
     @Override
     public List<StudyPlan> getUserPlans(Long userId) {
@@ -167,13 +164,16 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
     @Override
     @Transactional(rollbackFor = Exception.class)
     public StudyPlan updateProgress(Long planId, Integer completedTasks, Integer totalTasks, String note) {
+        // Overloaded for backward compatibility or direct calls
+        return updateProgressInternal(planId, completedTasks, totalTasks, null, note);
+    }
+    
+    private StudyPlan updateProgressInternal(Long planId, Integer completedTasks, Integer totalTasks, BigDecimal overridePercentage, String note) {
         StudyPlan plan = this.getById(planId);
         if (plan == null) {
             throw new RuntimeException("Plan not found");
         }
         
-        // Check permission or status if needed...
-
         BigDecimal previousProgress = plan.getProgressPercentage();
         if (previousProgress == null) {
             previousProgress = BigDecimal.ZERO;
@@ -184,17 +184,36 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
         
         // Calculate percentage
         BigDecimal percentage = BigDecimal.ZERO;
-        if (totalTasks != null && totalTasks > 0) {
+        if (overridePercentage != null) {
+            percentage = overridePercentage;
+        } else if (totalTasks != null && totalTasks > 0) {
             percentage = BigDecimal.valueOf(completedTasks)
                     .divide(BigDecimal.valueOf(totalTasks), 3, RoundingMode.HALF_UP)
                     .multiply(BigDecimal.valueOf(100))
                     .setScale(1, RoundingMode.HALF_UP);
         }
+        
+        // Cap at 100
+        if (percentage.compareTo(BigDecimal.valueOf(100)) > 0) {
+            percentage = BigDecimal.valueOf(100);
+        }
+        
         plan.setProgressPercentage(percentage);
         plan.setUpdateTime(LocalDateTime.now());
         
-        // If 100%, mark as completed automatically? Maybe not, let user decide or keep logic separate.
-        // But we can check if completedTasks == totalTasks
+        // Check Completion (100%)
+        if (percentage.compareTo(BigDecimal.valueOf(100)) == 0 && plan.getStatus() == 0) {
+            plan.setStatus(1); // Completed
+            
+            // Award Agreed Points
+            if (plan.getRewardPoints() != null && plan.getRewardPoints() > 0) {
+                pointsService.addPoints(plan.getUserId(), plan.getRewardPoints(), "完成学习计划: " + plan.getTitle());
+            } else if (Boolean.TRUE.equals(plan.getIsPointEligible())) {
+                // Fallback to old logic? 
+                // We can call completePlan logic or just leave it.
+                // For now, let's respect rewardPoints.
+            }
+        }
         
         this.updateById(plan);
 
@@ -228,7 +247,7 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
         taskMapper.insert(task);
         
         // Recalculate plan progress
-        recalculatePlanProgress(task.getPlanId());
+        refreshPlanProgress(task.getPlanId());
         
         return task;
     }
@@ -240,7 +259,7 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
         if (task != null) {
             Long planId = task.getPlanId();
             taskMapper.deleteById(taskId);
-            recalculatePlanProgress(planId);
+            refreshPlanProgress(planId);
         }
     }
 
@@ -251,7 +270,7 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
         if (task != null) {
             task.setStatus(status);
             taskMapper.updateById(task);
-            recalculatePlanProgress(task.getPlanId());
+            refreshPlanProgress(task.getPlanId());
         }
         return task;
     }
@@ -263,14 +282,71 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
                 .orderByAsc(StudyPlanTask::getDeadline));
     }
 
-    private void recalculatePlanProgress(Long planId) {
-        List<StudyPlanTask> tasks = getPlanTasks(planId);
-        if (tasks.isEmpty()) return; // Or set to 0?
-
-        int total = tasks.size();
-        int completed = (int) tasks.stream().filter(t -> t.getStatus() == 1).count();
+    private void refreshPlanProgress(Long planId) {
+        StudyPlan plan = this.getById(planId);
+        if (plan == null) return;
         
-        updateProgress(planId, completed, total, "Auto update from tasks");
+        // 1. Tasks
+        List<StudyPlanTask> tasks = getPlanTasks(planId);
+        int totalTasks = tasks.size();
+        int completedTasks = (int) tasks.stream().filter(t -> t.getStatus() == 1).count();
+        
+        BigDecimal taskProgress = BigDecimal.ZERO;
+        if (totalTasks > 0) {
+            taskProgress = BigDecimal.valueOf(completedTasks)
+                    .divide(BigDecimal.valueOf(totalTasks), 3, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+        }
+
+        // 2. Time
+        BigDecimal timeProgress = BigDecimal.ZERO;
+        boolean hasTimeTarget = false;
+        if (plan.getTargetHours() != null && plan.getTargetHours() > 0) {
+            hasTimeTarget = true;
+            LocalDate start = plan.getStartDate();
+            LocalDate end = plan.getEndDate() != null ? plan.getEndDate() : LocalDate.now();
+            
+            List<Checkin> checkins = checkinMapper.selectList(new LambdaQueryWrapper<Checkin>()
+                    .eq(Checkin::getUserId, plan.getUserId())
+                    .ge(Checkin::getCheckinDate, start)
+                    .le(Checkin::getCheckinDate, end));
+            
+            int totalMinutes = checkins.stream()
+                    .mapToInt(c -> c.getStudyDuration() != null ? c.getStudyDuration() : 0)
+                    .sum();
+            
+            timeProgress = BigDecimal.valueOf(totalMinutes)
+                    .divide(BigDecimal.valueOf(plan.getTargetHours() * 60L), 3, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+            
+            if (timeProgress.compareTo(BigDecimal.valueOf(100)) > 0) {
+                timeProgress = BigDecimal.valueOf(100);
+            }
+        }
+        
+        // Combine
+        BigDecimal finalProgress = BigDecimal.ZERO;
+        if (totalTasks > 0 && hasTimeTarget) {
+            finalProgress = taskProgress.add(timeProgress).divide(BigDecimal.valueOf(2), 1, RoundingMode.HALF_UP);
+        } else if (totalTasks > 0) {
+            finalProgress = taskProgress;
+        } else if (hasTimeTarget) {
+            finalProgress = timeProgress;
+        }
+        
+        updateProgressInternal(planId, completedTasks, totalTasks, finalProgress, "Auto update (Tasks + Time)");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateAllPlansProgress(Long userId) {
+        List<StudyPlan> activePlans = this.list(new LambdaQueryWrapper<StudyPlan>()
+                .eq(StudyPlan::getUserId, userId)
+                .eq(StudyPlan::getStatus, 0));
+        
+        for (StudyPlan plan : activePlans) {
+             refreshPlanProgress(plan.getId());
+        }
     }
 
     @Override
@@ -319,6 +395,7 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
             newPlan.setProgressPercentage(BigDecimal.ZERO);
             newPlan.setCreateTime(LocalDateTime.now());
             newPlan.setUpdateTime(LocalDateTime.now());
+            newPlan.setRewardPoints(template.getRewardPoints()); // Copy reward points
             
             this.save(newPlan);
             

@@ -50,6 +50,7 @@ public class BusinessIntegrationTest {
     private Long studentId;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     public void setup() throws Exception {
         // Register & Login Teacher
         String tName = "teacher_" + UUID.randomUUID().toString().substring(0, 6);
@@ -96,6 +97,7 @@ public class BusinessIntegrationTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testCourseAndTaskFlow() throws Exception {
         // 1. Teacher creates a course
         Map<String, Object> courseParams = new HashMap<>();
@@ -154,7 +156,6 @@ public class BusinessIntegrationTest {
                 .andReturn();
         
         Map<String, Object> tListMap = objectMapper.readValue(tListRes.getResponse().getContentAsString(), new TypeReference<Map<String, Object>>() {});
-        @SuppressWarnings("unchecked")
         List<Map<String, Object>> tasks = (List<Map<String, Object>>) tListMap.get("data");
         // Accessing "task" object within the list element
         Map<String, Object> taskData = (Map<String, Object>) tasks.get(0).get("task");

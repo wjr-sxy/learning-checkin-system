@@ -8,7 +8,6 @@ import com.example.learningcheckin.entity.User;
 import com.example.learningcheckin.mapper.PointsRecordMapper;
 import com.example.learningcheckin.mapper.SysConfigMapper;
 import com.example.learningcheckin.mapper.UserMapper;
-import com.example.learningcheckin.service.IConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +27,6 @@ public class AdminPointsController {
 
     @Autowired
     private PointsRecordMapper pointsRecordMapper;
-
-    @Autowired
-    private IConfigService configService;
 
     @Autowired
     private UserMapper userMapper;

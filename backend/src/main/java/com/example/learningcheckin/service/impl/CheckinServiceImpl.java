@@ -8,6 +8,7 @@ import com.example.learningcheckin.mapper.CheckinMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import com.example.learningcheckin.service.ICheckinService;
 import com.example.learningcheckin.service.IPointsService;
+import com.example.learningcheckin.service.IStudyPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,9 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
     @Autowired
     private IPointsService pointsService;
 
+    @Autowired
+    private IStudyPlanService studyPlanService;
+
     @Override
     public boolean isCheckedIn(Long userId, LocalDate date) {
         return this.count(new LambdaQueryWrapper<Checkin>()
@@ -37,7 +41,7 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Checkin dailyCheckin(Long userId) {
+    public Checkin dailyCheckin(Long userId, String ipAddress) {
         LocalDate today = LocalDate.now();
         if (isCheckedIn(userId, today)) {
             throw new RuntimeException("今日已打卡");
@@ -50,6 +54,7 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
         checkin.setCheckinTime(LocalDateTime.now());
         checkin.setStudyDuration(0); 
         checkin.setIsSupplementary(false);
+        checkin.setIpAddress(ipAddress);
         this.save(checkin);
 
         // 2. Update Continuous Days and Last Check-in Date
@@ -58,12 +63,15 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
         // 3. Add Points (10 points)
         pointsService.addPoints(userId, 10, "每日打卡");
 
+        // 4. Update Study Plan Progress
+        studyPlanService.updateAllPlansProgress(userId);
+
         return checkin;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Checkin reCheckin(Long userId, LocalDate date) {
+    public Checkin reCheckin(Long userId, LocalDate date, String ipAddress) {
         LocalDate today = LocalDate.now();
         if (!date.isBefore(today)) {
             throw new RuntimeException("只能补签过去的日期");
@@ -96,10 +104,14 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
         checkin.setCheckinTime(LocalDateTime.now());
         checkin.setStudyDuration(0);
         checkin.setIsSupplementary(true);
+        checkin.setIpAddress(ipAddress);
         this.save(checkin);
 
         // Recalculate continuous days
         updateContinuousDays(userId);
+
+        // Update Study Plan Progress
+        studyPlanService.updateAllPlansProgress(userId);
 
         return checkin;
     }

@@ -8,7 +8,6 @@ import com.example.learningcheckin.mapper.SysLogMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import com.example.learningcheckin.service.IProductService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +68,46 @@ public class UserController {
         
         userMapper.updateById(user);
         return Result.success("Equipped successfully");
+    }
+
+    @PostMapping("/wearDecoration")
+    public Result<String> wearDecoration(@RequestBody Map<String, Object> body) {
+        Long userId = Long.valueOf(body.get("userId").toString());
+        String imageUrl = (String) body.get("imageUrl");
+
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            // Option to unequip if imageUrl is empty? Or just error?
+            // Assuming removing frame if empty, or just error.
+            // Let's assume user wants to wear specific one.
+            // If empty, maybe unwear. Let's support unwear if empty.
+            User user = userMapper.selectById(userId);
+            user.setCurrentAvatarFrame(null);
+            userMapper.updateById(user);
+            return Result.success("Decoration removed");
+        }
+
+        // Validate ownership via sys_order (using productService.getOwnedProducts)
+        List<Product> owned = productService.getOwnedProducts(userId);
+        
+        // Find product matching the image URL
+        Product target = owned.stream()
+                .filter(p -> imageUrl.equals(p.getImageUrl()))
+                .findFirst()
+                .orElse(null);
+
+        if (target == null) {
+            return Result.error(400, "您未购买该头像框或已过期");
+        }
+
+        if (target.getExpireTime() != null && target.getExpireTime().isBefore(LocalDateTime.now())) {
+             return Result.error(400, "该头像框已过期");
+        }
+
+        User user = userMapper.selectById(userId);
+        user.setCurrentAvatarFrame(imageUrl);
+        userMapper.updateById(user);
+        
+        return Result.success("佩戴成功");
     }
 
     @PutMapping("/profile")

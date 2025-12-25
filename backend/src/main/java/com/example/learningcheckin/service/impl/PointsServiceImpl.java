@@ -1,6 +1,7 @@
 package com.example.learningcheckin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.learningcheckin.dto.TrendPointDTO;
 import com.example.learningcheckin.entity.PointsRecord;
@@ -52,17 +53,23 @@ public class PointsServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRec
     public void deductPoints(Long userId, Integer amount, String description) {
         if (amount <= 0) return;
 
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new RuntimeException("User not found");
-        }
+        // Atomic update using SQL: UPDATE sys_user SET points = points - amount WHERE id = userId AND points >= amount
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.setSql("points = points - " + amount)
+                     .eq("id", userId)
+                     .ge("points", amount);
 
-        if (user.getPoints() < amount) {
-            throw new RuntimeException("积分不足");
-        }
+        int rows = userMapper.update(null, updateWrapper);
 
-        user.setPoints(user.getPoints() - amount);
-        userMapper.updateById(user);
+        if (rows == 0) {
+            // Determine the cause of failure: User not found OR Insufficient points
+            User user = userMapper.selectById(userId);
+            if (user == null) {
+                throw new RuntimeException("User not found");
+            } else {
+                throw new RuntimeException("积分不足");
+            }
+        }
 
         PointsRecord pr = new PointsRecord();
         pr.setUserId(userId);
