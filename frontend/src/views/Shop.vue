@@ -56,6 +56,12 @@
             >
                 <div class="card-image">
                     <LazyImage :src="product.imageUrl" :alt="product.name" />
+                    
+                    <!-- Rarity Tag for Avatar Frames -->
+                    <div class="rarity-tag" v-if="product.type === 'AVATAR_FRAME'" :class="getRarityClass(product.price)">
+                        {{ getRarityText(product.price) }}
+                    </div>
+
                     <div class="product-type-tag" v-if="product.stock <= 0">
                         <div class="sold-out-mask">
                             <el-icon><SoldOut /></el-icon>
@@ -282,6 +288,18 @@ const openPreview = (product: any) => {
     previewVisible.value = true
 }
 
+const getRarityClass = (price: number) => {
+    if (price >= 4000) return 'rarity-legendary'
+    if (price >= 1000) return 'rarity-rare'
+    return 'rarity-common'
+}
+
+const getRarityText = (price: number) => {
+    if (price >= 4000) return '传说'
+    if (price >= 1000) return '稀有'
+    return '普通'
+}
+
 const handleExchange = async (product: any, shippingInfo?: any) => {
     if (!userStore.user) {
         ElMessage.warning('请先登录')
@@ -416,5 +434,31 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* Rarity Tags */
+.rarity-tag {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.rarity-common {
+    background: #909399; /* Grey */
+}
+
+.rarity-rare {
+    background: linear-gradient(135deg, #409EFF, #337ecc); /* Blue */
+}
+
+.rarity-legendary {
+    background: linear-gradient(135deg, #FFD700, #FFA500); /* Gold */
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 </style>

@@ -9,6 +9,16 @@
           <div class="user-info" v-if="userStore.user">
             <NotificationCenter />
             <AccountSwitcher />
+            
+            <!-- Avatar Frame Integration -->
+            <div class="user-avatar-container" @click="router.push('/profile')" style="cursor: pointer; position: relative; margin-left: 15px; width: 40px; height: 40px;">
+              <AvatarFrame 
+                :avatar-url="userStore.user.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
+                :frame-url="userStore.user.currentAvatarFrame"
+                :size="40"
+              />
+            </div>
+
             <span class="points-badge" @click="router.push('/profile/points')" style="cursor: pointer; margin-left: 15px;">
               <el-icon><Coin /></el-icon>
               {{ userStore.user.points }}
@@ -185,12 +195,28 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import TeacherTasks from './TeacherTasks.vue'
 import AccountSwitcher from '../../components/AccountSwitcher.vue'
+import NotificationCenter from '../../components/NotificationCenter.vue'
+import AvatarFrame from '../../components/AvatarFrame.vue'
 
 const userStore = useUserStore()
 const router = useRouter()
 const joinDialogVisible = ref(false)
 const joinFormRef = ref<FormInstance>()
 let timer: ReturnType<typeof setInterval> | null = null
+
+// Real-time Online Duration
+onMounted(() => {
+  timer = setInterval(() => {
+    userStore.todayOnlineSeconds++
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+})
 
 // Online Time
 const formattedTodayOnline = computed(() => {

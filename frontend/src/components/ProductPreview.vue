@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <!-- Trial Area (Image/Canvas) -->
+            <!-- Trial Area (Image/Canvas/Frame) -->
             <div 
                 v-else 
                 class="trial-area" 
@@ -41,7 +41,14 @@
                     class="trial-target" 
                     :style="trialStyle"
                 >
-                     <img :src="product.imageUrl" class="trial-image" />
+                    <!-- Avatar Frame Layering -->
+                    <div v-if="product.type === 'AVATAR_FRAME'" class="avatar-frame-preview">
+                         <img src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" class="base-avatar" />
+                         <img :src="product.imageUrl" class="frame-overlay" />
+                    </div>
+
+                    <!-- Standard Image -->
+                    <img v-else :src="product.imageUrl" class="trial-image" />
                 </div>
                 <div class="trial-hint">双指缩放/旋转</div>
             </div>
@@ -452,6 +459,32 @@ onUnmounted(() => {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+.avatar-frame-preview {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.base-avatar {
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.frame-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
 }
 
 .trial-hint {

@@ -53,13 +53,8 @@ public class PointsServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRec
     public void deductPoints(Long userId, Integer amount, String description) {
         if (amount <= 0) return;
 
-        // Atomic update using SQL: UPDATE sys_user SET points = points - amount WHERE id = userId AND points >= amount
-        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.setSql("points = points - " + amount)
-                     .eq("id", userId)
-                     .ge("points", amount);
-
-        int rows = userMapper.update(null, updateWrapper);
+        // Atomic update using UserMapper
+        int rows = userMapper.deductPoints(userId, amount);
 
         if (rows == 0) {
             // Determine the cause of failure: User not found OR Insufficient points
@@ -67,7 +62,7 @@ public class PointsServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRec
             if (user == null) {
                 throw new RuntimeException("User not found");
             } else {
-                throw new RuntimeException("积分不足");
+                throw new RuntimeException("积分余额不足");
             }
         }
 

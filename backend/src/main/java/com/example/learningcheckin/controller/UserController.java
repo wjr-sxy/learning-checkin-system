@@ -76,10 +76,7 @@ public class UserController {
         String imageUrl = (String) body.get("imageUrl");
 
         if (imageUrl == null || imageUrl.isEmpty()) {
-            // Option to unequip if imageUrl is empty? Or just error?
-            // Assuming removing frame if empty, or just error.
-            // Let's assume user wants to wear specific one.
-            // If empty, maybe unwear. Let's support unwear if empty.
+            // Unwear if empty
             User user = userMapper.selectById(userId);
             user.setCurrentAvatarFrame(null);
             userMapper.updateById(user);

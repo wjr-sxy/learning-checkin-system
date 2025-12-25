@@ -19,6 +19,7 @@ public class User {
     private String role;
     private Integer status; // 0: Normal, 1: Banned
     private Integer continuousCheckinDays;
+    private Integer maxStreak; // Historical max continuous check-in days
     private java.time.LocalDate lastCheckinDate;
     
     // New fields for Personal Center

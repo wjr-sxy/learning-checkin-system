@@ -125,9 +125,11 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
 
     private void updateContinuousDays(Long userId) {
         User user = userMapper.selectById(userId);
-        // Get all check-in dates
+        // Optimize: Only query last 60 days to improve performance
+        LocalDate limitDate = LocalDate.now().minusDays(60);
         List<Checkin> list = this.list(new LambdaQueryWrapper<Checkin>()
                 .eq(Checkin::getUserId, userId)
+                .ge(Checkin::getCheckinDate, limitDate)
                 .select(Checkin::getCheckinDate)
                 .orderByDesc(Checkin::getCheckinDate));
         
@@ -139,11 +141,6 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
 
         Set<LocalDate> dates = list.stream().map(Checkin::getCheckinDate).collect(Collectors.toSet());
         LocalDate current = LocalDate.now();
-        
-        // If not checked in today, check if checked in yesterday. 
-        // If neither, streak is broken (0).
-        // Exception: If calculating AFTER a re-checkin in the past, the streak might be preserved relative to THAT day?
-        // No, "Continuous Check-in Days" usually means "Streak ending Today (or Yesterday)".
         
         int streak = 0;
         if (dates.contains(current)) {
@@ -163,6 +160,12 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
             }
         } else {
             streak = 0;
+        }
+
+        // Update Max Streak
+        int currentMax = user.getMaxStreak() == null ? 0 : user.getMaxStreak();
+        if (streak > currentMax) {
+            user.setMaxStreak(streak);
         }
 
         user.setContinuousCheckinDays(streak);

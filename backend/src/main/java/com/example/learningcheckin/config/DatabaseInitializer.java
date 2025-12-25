@@ -79,15 +79,16 @@ public class DatabaseInitializer implements CommandLineRunner {
 
         // 2. 用户表字段扩展 (User Table Extensions)
         String[] userColumns = {
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `full_name` VARCHAR(50) DEFAULT NULL COMMENT 'Full Name'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `college` VARCHAR(100) DEFAULT NULL COMMENT 'College'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `phone` VARCHAR(20) DEFAULT NULL COMMENT 'Phone Number'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `continuous_checkin_days` INT DEFAULT 0 COMMENT 'Continuous Checkin Days'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `last_checkin_date` DATE DEFAULT NULL COMMENT 'Last Checkin Date'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `total_online_seconds` BIGINT DEFAULT 0 COMMENT 'Total Online Seconds'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `last_active_time` DATETIME DEFAULT NULL COMMENT 'Last Active Time'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `allow_friend_add` TINYINT(1) DEFAULT 1 COMMENT 'Allow Friend Add'",
-            "ALTER TABLE `sys_user` ADD COLUMN IF NOT EXISTS `status` TINYINT DEFAULT 0 COMMENT '0: Normal, 1: Banned'",
+            "ALTER TABLE `sys_user` ADD COLUMN `full_name` VARCHAR(50) DEFAULT NULL COMMENT 'Full Name'",
+            "ALTER TABLE `sys_user` ADD COLUMN `college` VARCHAR(100) DEFAULT NULL COMMENT 'College'",
+            "ALTER TABLE `sys_user` ADD COLUMN `phone` VARCHAR(20) DEFAULT NULL COMMENT 'Phone Number'",
+            "ALTER TABLE `sys_user` ADD COLUMN `continuous_checkin_days` INT DEFAULT 0 COMMENT 'Continuous Checkin Days'",
+            "ALTER TABLE `sys_user` ADD COLUMN `max_streak` INT DEFAULT 0 COMMENT 'Max Streak'",
+            "ALTER TABLE `sys_user` ADD COLUMN `last_checkin_date` DATE DEFAULT NULL COMMENT 'Last Checkin Date'",
+            "ALTER TABLE `sys_user` ADD COLUMN `total_online_seconds` BIGINT DEFAULT 0 COMMENT 'Total Online Seconds'",
+            "ALTER TABLE `sys_user` ADD COLUMN `last_active_time` DATETIME DEFAULT NULL COMMENT 'Last Active Time'",
+            "ALTER TABLE `sys_user` ADD COLUMN `allow_friend_add` TINYINT(1) DEFAULT 1 COMMENT 'Allow Friend Add'",
+            "ALTER TABLE `sys_user` ADD COLUMN `status` TINYINT DEFAULT 0 COMMENT '0: Normal, 1: Banned'",
             "ALTER TABLE `sys_user` MODIFY COLUMN `avatar` LONGTEXT DEFAULT NULL COMMENT 'Avatar URL/Base64'"
         };
         executeSafe(userColumns);
@@ -200,7 +201,14 @@ public class DatabaseInitializer implements CommandLineRunner {
             try {
                 jdbcTemplate.execute(sql);
             } catch (Exception e) {
-                // 静默忽略常见错误，生产环境建议记录 DEBUG 日志
+                // 打印错误以便调试，但不要阻断启动
+                String msg = e.getMessage();
+                if (msg != null && (msg.contains("Duplicate column") || msg.contains("already exists"))) {
+                    // 忽略重复列错误
+                } else {
+                    System.err.println("DatabaseInitializer Warning: Failed to execute SQL: " + sql);
+                    System.err.println("Error: " + msg);
+                }
             }
         }
     }
