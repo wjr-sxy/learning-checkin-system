@@ -1,90 +1,184 @@
 <template>
   <div class="friends-container">
     <div class="header">
-      <h2>我的好友</h2>
-      <el-button type="primary" @click="showAddDialog = true">
+      <div class="header-left">
+        <h2>我的好友</h2>
+        <span class="subtitle">与 {{ friendStore.friends.length }} 位好友一起学习</span>
+      </div>
+      <el-button type="primary" class="add-btn" @click="showAddDialog = true">
         <el-icon><Plus /></el-icon> 添加好友
       </el-button>
     </div>
 
     <el-tabs v-model="activeTab" class="friend-tabs">
-      <el-tab-pane label="好友列表" name="list">
+      <el-tab-pane name="list">
+        <template #label>
+          <div class="tab-label">
+            <el-icon><User /></el-icon>
+            <span>好友列表</span>
+          </div>
+        </template>
+        
         <div v-if="friendStore.loading" class="loading-state">
            <el-skeleton :rows="3" animated />
         </div>
         <el-empty v-else-if="friendStore.friends.length === 0" description="暂无好友，快去添加吧！" />
+        
         <div v-else class="friend-grid">
-          <div v-for="friend in friendStore.friends" :key="friend.id" class="friend-card">
-            <div class="friend-info">
-               <el-avatar :size="50" :src="friend.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
-               <div class="text-info">
-                 <div class="name">{{ friend.fullName || friend.username }}</div>
-                 <div class="status">
-                   <span class="status-dot" :class="{ online: isOnline(friend.lastActiveTime) }"></span>
-                   {{ isOnline(friend.lastActiveTime) ? '在线' : '离线' }}
-                 </div>
-               </div>
+          <el-card 
+            v-for="friend in friendStore.friends" 
+            :key="friend.id" 
+            class="friend-card" 
+            shadow="hover" 
+            :body-style="{ padding: '0px' }"
+          >
+            <div class="card-content">
+              <!-- Avatar Section -->
+              <div class="avatar-wrapper">
+                <AvatarFrame 
+                   :avatar-url="friend.avatar || defaultAvatar" 
+                   :frame-url="friend.currentAvatarFrame" 
+                   :size="80" 
+                />
+                <div 
+                  class="status-dot" 
+                  :class="{ online: friend.isOnline }"
+                  :title="friend.isOnline ? '在线' : '离线'"
+                ></div>
+              </div>
+              
+              <!-- Info Section -->
+              <div class="info-wrapper">
+                <div class="name-row">
+                   <span class="name">{{ friend.fullName || friend.username }}</span>
+                   <el-tag v-if="friend.college" size="small" effect="plain" round>{{ friend.college }}</el-tag>
+                </div>
+                <div class="status-text">
+                   <span v-if="friend.isOnline" class="online-text">当前在线</span>
+                   <span v-else>上次活跃: {{ formatLastActive(friend.lastActiveTime) }}</span>
+                </div>
+              </div>
+
+              <!-- Action Section -->
+              <div class="actions-wrapper">
+                 <el-tooltip 
+                   :content="friend.isCheckedIn ? '好友今日已打卡' : '提醒好友去打卡'" 
+                   placement="top"
+                 >
+                   <el-button 
+                     :type="friend.isCheckedIn ? 'info' : 'primary'" 
+                     :plain="friend.isCheckedIn"
+                     :disabled="friend.isCheckedIn"
+                     class="action-btn remind-btn"
+                     @click="handleRemind(friend)"
+                   >
+                     <el-icon class="mr-1"><Bell /></el-icon>
+                     {{ friend.isCheckedIn ? '已打卡' : '催打卡' }}
+                   </el-button>
+                 </el-tooltip>
+                 
+                 <el-popconfirm title="确定删除该好友吗?" @confirm="confirmDelete(friend)">
+                   <template #reference>
+                     <el-button link type="danger" class="action-btn delete-btn">
+                       <el-icon><Delete /></el-icon>
+                     </el-button>
+                   </template>
+                 </el-popconfirm>
+              </div>
             </div>
-            <div class="actions">
-               <el-button type="danger" link @click="confirmDelete(friend)">删除</el-button>
-            </div>
-          </div>
+          </el-card>
         </div>
       </el-tab-pane>
 
       <el-tab-pane name="requests">
         <template #label>
-          <span class="custom-tabs-label">
+          <div class="tab-label">
+            <el-icon><Message /></el-icon>
             <span>好友请求</span>
             <el-badge v-if="friendStore.requests.length > 0" :value="friendStore.requests.length" class="badge-item" />
-          </span>
+          </div>
         </template>
         
         <el-empty v-if="friendStore.requests.length === 0" description="暂无新的好友请求" />
         <div v-else class="request-list">
-           <div v-for="req in friendStore.requests" :key="req.requestId" class="request-item">
-              <div class="requester-info">
-                 <el-avatar :size="40" :src="req.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
-                 <div class="req-details">
-                    <div class="name">{{ req.fullName || req.username }}</div>
-                    <div class="time">{{ formatTime(req.createTime) }}</div>
+           <el-card v-for="req in friendStore.requests" :key="req.requestId" class="request-card" shadow="hover">
+              <div class="request-content">
+                 <div class="requester-info">
+                    <AvatarFrame 
+                       :avatar-url="req.avatar || defaultAvatar" 
+                       :size="50" 
+                    />
+                    <div class="req-details">
+                       <div class="name">{{ req.fullName || req.username }}</div>
+                       <div class="time">申请时间: {{ formatTime(req.createTime) }}</div>
+                    </div>
+                 </div>
+                 <div class="req-actions">
+                    <el-button type="success" @click="friendStore.handleRequest(req.requestId, 1)">
+                       <el-icon class="mr-1"><Check /></el-icon> 接受
+                    </el-button>
+                    <el-button type="text" class="reject-btn" @click="friendStore.handleRequest(req.requestId, 2)">
+                       拒绝
+                    </el-button>
                  </div>
               </div>
-              <div class="req-actions">
-                 <el-button type="success" size="small" @click="friendStore.handleRequest(req.requestId, 1)">接受</el-button>
-                 <el-button type="info" size="small" @click="friendStore.handleRequest(req.requestId, 2)">拒绝</el-button>
-              </div>
-           </div>
+           </el-card>
         </div>
       </el-tab-pane>
     </el-tabs>
 
     <!-- Add Friend Dialog -->
-    <el-dialog v-model="showAddDialog" title="添加好友" width="500px">
-      <div class="search-box">
-        <el-input 
-          v-model="searchKeyword" 
-          placeholder="输入用户名或姓名搜索" 
-          @keyup.enter="handleSearch"
-          clearable
-        >
-          <template #append>
-            <el-button @click="handleSearch">
-               <el-icon><Search /></el-icon>
-            </el-button>
-          </template>
-        </el-input>
+    <el-dialog v-model="showAddDialog" title="添加好友" width="600px" custom-class="search-dialog">
+      <div class="search-container">
+         <div class="search-inputs">
+           <el-select 
+             v-model="searchCollege" 
+             placeholder="按学院筛选" 
+             clearable 
+             class="college-select"
+             @change="handleSearch"
+           >
+              <el-option v-for="c in colleges" :key="c" :label="c" :value="c" />
+           </el-select>
+           <el-input 
+              v-model="searchKeyword" 
+              placeholder="输入用户名或姓名搜索" 
+              class="keyword-input"
+              @keyup.enter="handleSearch"
+              clearable
+           >
+              <template #append>
+                <el-button @click="handleSearch">
+                   <el-icon><Search /></el-icon>
+                </el-button>
+              </template>
+           </el-input>
+         </div>
       </div>
       
-      <div class="search-results mt-4">
-         <div v-if="searchResults.length === 0 && hasSearched" class="no-results">未找到用户</div>
+      <div class="search-results-area">
+         <div v-if="friendStore.loading" class="loading-state">
+            <el-skeleton :rows="2" animated />
+         </div>
+         <div v-else-if="searchResults.length === 0 && hasSearched" class="empty-result">
+            <el-empty description="没找到？尝试邀请室友加入吧" :image-size="100" />
+         </div>
          <div v-else class="user-list">
             <div v-for="user in searchResults" :key="user.id" class="user-item">
                <div class="user-basic">
-                  <el-avatar :size="36" :src="user.avatar || 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'" />
-                  <span>{{ user.fullName || user.username }}</span>
+                  <AvatarFrame 
+                     :avatar-url="user.avatar || defaultAvatar" 
+                     :frame-url="user.currentAvatarFrame"
+                     :size="40" 
+                  />
+                  <div class="user-text">
+                    <span class="username">{{ user.fullName || user.username }}</span>
+                    <span class="college" v-if="user.college">{{ user.college }}</span>
+                  </div>
                </div>
-               <el-button type="primary" size="small" @click="friendStore.sendRequest(user.id)">添加</el-button>
+               <el-button type="primary" size="small" round @click="friendStore.sendRequest(user.id)">
+                 <el-icon class="mr-1"><Plus /></el-icon> 添加
+               </el-button>
             </div>
          </div>
       </div>
@@ -95,46 +189,60 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useFriendStore } from '../stores/friend'
-import { Plus, Search } from '@element-plus/icons-vue'
-import { ElMessageBox } from 'element-plus'
+import { Plus, Search, User, Message, Delete, Bell, Check } from '@element-plus/icons-vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
+import AvatarFrame from '@/components/AvatarFrame.vue'
 
 const friendStore = useFriendStore()
 const activeTab = ref('list')
 const showAddDialog = ref(false)
 const searchKeyword = ref('')
+const searchCollege = ref('')
 const searchResults = ref<any[]>([])
 const hasSearched = ref(false)
+const defaultAvatar = 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png'
 
-const isOnline = (lastActiveTime: string) => {
-    if (!lastActiveTime) return false
-    // If active within last 5 minutes, consider online
-    const diff = dayjs().diff(dayjs(lastActiveTime), 'minute')
-    return diff < 5
+// Common colleges list
+const colleges = [
+  '计算机学院',
+  '软件学院',
+  '信息工程学院',
+  '外国语学院',
+  '经济管理学院',
+  '理学院',
+  '艺术学院'
+]
+
+const formatLastActive = (time: string) => {
+    if (!time) return '很久以前'
+    return dayjs(time).fromNow()
 }
 
 const formatTime = (time: string) => {
-    return dayjs(time).format('MM-DD HH:mm')
+    return dayjs(time).format('YYYY-MM-DD HH:mm')
 }
 
 const handleSearch = async () => {
-    if (!searchKeyword.value.trim()) return
-    searchResults.value = await friendStore.searchUsers(searchKeyword.value)
+    if (!searchKeyword.value.trim() && !searchCollege.value) {
+      if (hasSearched.value) {
+        searchResults.value = []
+        hasSearched.value = false
+      }
+      return
+    }
+    
+    searchResults.value = await friendStore.searchUsers(searchKeyword.value, searchCollege.value)
     hasSearched.value = true
 }
 
+const handleRemind = (friend: any) => {
+  if (friend.isCheckedIn) return
+  friendStore.remindFriend(friend.id)
+}
+
 const confirmDelete = (friend: any) => {
-    ElMessageBox.confirm(
-        `确定要删除好友 ${friend.fullName || friend.username} 吗?`,
-        '提示',
-        {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-        }
-    ).then(() => {
-        friendStore.deleteFriend(friend.id)
-    })
+    friendStore.deleteFriend(friend.id)
 }
 
 onMounted(() => {
@@ -145,132 +253,231 @@ onMounted(() => {
 
 <style scoped>
 .friends-container {
-  padding: 20px;
-  max-width: 1000px;
+  padding: 24px;
+  max-width: 1200px;
   margin: 0 auto;
-  background-color: var(--bg-color-white);
-  border-radius: 8px;
   min-height: 80vh;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-end;
+  margin-bottom: 24px;
 }
 
 .header h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 28px;
+    font-weight: 700;
     color: var(--text-primary);
+    background: var(--student-theme);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-left: 12px;
+}
+
+.add-btn {
+  box-shadow: 0 4px 12px var(--shadow-color-light);
+}
+
+.friend-tabs :deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+}
+
+.tab-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Friend Grid Layout */
 .friend-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
 
 .friend-card {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s;
+    border: none;
+    background: var(--bg-color-white);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: visible;
 }
 
 .friend-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px var(--shadow-color-base);
+    z-index: 1;
 }
 
-.friend-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.card-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
 }
 
-.text-info .name {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.status {
-    font-size: 12px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+.avatar-wrapper {
+  position: relative;
 }
 
 .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #909399;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--info-color-light);
+  border: 2px solid #fff;
+  transition: background-color 0.3s;
 }
 
 .status-dot.online {
-    background-color: #67C23A;
+  background-color: var(--success-color);
+  box-shadow: 0 0 4px var(--success-color);
 }
 
-.badge-item {
-    margin-left: 5px;
+.name-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.status-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.online-text {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.remind-btn {
+  flex: 1;
+  max-width: 120px;
+}
+
+/* Request List */
 .request-list {
-    max-width: 600px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.request-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-bottom: 1px solid var(--border-color);
+.request-card {
+  border: 1px solid var(--border-color-lighter);
+}
+
+.request-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .requester-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .req-details .name {
-    font-weight: 600;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .req-details .time {
-    font-size: 12px;
-    color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-.user-list {
-    max-height: 300px;
-    overflow-y: auto;
+.reject-btn {
+  color: var(--text-secondary);
+}
+
+.reject-btn:hover {
+  color: var(--text-regular);
+}
+
+/* Search Dialog */
+.search-inputs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.college-select {
+  width: 140px;
+}
+
+.keyword-input {
+  flex: 1;
 }
 
 .user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color-lighter);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color-lighter);
+  transition: background-color 0.2s;
+}
+
+.user-item:hover {
+  background-color: var(--bg-color-base);
 }
 
 .user-basic {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.no-results {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 20px;
+.user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-text .username {
+  font-weight: 500;
+}
+
+.user-text .college {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mr-1 {
+  margin-right: 4px;
 }
 </style>

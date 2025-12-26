@@ -16,6 +16,14 @@ export function getUserOnlineStats(userId: number) {
   })
 }
 
+export function getTodayOnlineSeconds(userId: number) {
+  return request({
+    url: '/stats/online/today',
+    method: 'get',
+    params: { userId }
+  })
+}
+
 export function getOnlineLeaderboard(type: string = 'month') {
   return request({
     url: '/stats/online/leaderboard',

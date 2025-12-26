@@ -263,9 +263,11 @@ const handleForceLogout = (row: any) => {
       // Simulating success
       ElMessage.success('设备已下线')
       // In reality, we would refresh the list or remove the item
-      const index = loginLogs.value.indexOf(row)
-      if (index > -1) {
-        loginLogs.value.splice(index, 1)
+      if (loginLogs.value && Array.isArray(loginLogs.value)) {
+        const index = loginLogs.value.indexOf(row)
+        if (index > -1) {
+          loginLogs.value.splice(index, 1)
+        }
       }
     })
     .catch(() => {

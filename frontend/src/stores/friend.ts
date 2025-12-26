@@ -84,12 +84,13 @@ export const useFriendStore = defineStore('friend', () => {
         }
     }
 
-    const searchUsers = async (keyword: string) => {
+    const searchUsers = async (keyword: string, college?: string) => {
         if (!userStore.user) return []
         try {
             const res = await axios.get(`${BASE_URL}/search`, {
                 params: {
                     keyword,
+                    college,
                     currentUserId: userStore.user.id
                 }
             })
@@ -97,6 +98,18 @@ export const useFriendStore = defineStore('friend', () => {
         } catch (error) {
             console.error('Search error', error)
             return []
+        }
+    }
+
+    const remindFriend = async (friendId: number) => {
+        if (!userStore.user) return
+        try {
+            await axios.post(`${BASE_URL}/remind/${friendId}`, null, {
+                params: { userId: userStore.user.id }
+            })
+            ElMessage.success('已发送提醒')
+        } catch (error: any) {
+            ElMessage.error(error.response?.data?.message || '提醒失败')
         }
     }
 
@@ -109,6 +122,7 @@ export const useFriendStore = defineStore('friend', () => {
         sendRequest,
         handleRequest,
         deleteFriend,
-        searchUsers
+        searchUsers,
+        remindFriend
     }
 })

@@ -174,16 +174,25 @@ public class DatabaseInitializer implements CommandLineRunner {
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
             "CREATE TABLE IF NOT EXISTS `sys_daily_online_stats` (\n" +
-            "    `id` BIGINT NOT NULL AUTO_INCREMENT,\n" +
-            "    `user_id` BIGINT NOT NULL,\n" +
-            "    `stats_date` DATE NOT NULL,\n" +
-            "    `duration_seconds` BIGINT DEFAULT 0,\n" +
-            "    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,\n" +
-            "    PRIMARY KEY (`id`),\n" +
-            "    UNIQUE KEY `uk_user_date` (`user_id`, `stats_date`)\n" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+            "   `id` bigint NOT NULL AUTO_INCREMENT,\n" +
+            "   `user_id` bigint NOT NULL COMMENT '用户ID',\n" +
+            "   `stats_date` date NOT NULL COMMENT '统计日期',\n" +
+            "   `online_seconds` int DEFAULT '0' COMMENT '当日在线秒数',\n" +
+            "   `last_active_time` datetime DEFAULT NULL COMMENT '最后活跃时间',\n" +
+            "   PRIMARY KEY (`id`),\n" +
+            "   UNIQUE KEY `uk_user_date` (`user_id`,`stats_date`)\n" +
+            " ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日在线时长统计'"
         };
         executeSafe(tableDDLs);
+
+        // 6.5 修正 sys_daily_online_stats 表结构 (Migrate daily stats table)
+        // 如果表已存在但使用旧字段，进行迁移
+        String[] statsMigration = {
+            "ALTER TABLE `sys_daily_online_stats` CHANGE COLUMN `duration_seconds` `online_seconds` INT DEFAULT 0 COMMENT '当日在线秒数'",
+            "ALTER TABLE `sys_daily_online_stats` ADD COLUMN IF NOT EXISTS `last_active_time` DATETIME DEFAULT NULL COMMENT '最后活跃时间'",
+            // 如果 create_time/update_time 存在，可以保留或忽略，这里我们主要确保 user 指定的字段存在
+        };
+        executeSafe(statsMigration);
 
         // 7. 移除旧的积分规则表 (Cleanup old tables)
         try {

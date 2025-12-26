@@ -7,7 +7,7 @@ export const getAdminProducts = (params?: any) => {
 
 export const saveProduct = (data: any) => {
   if (data.id) {
-    return request.post('/admin/shop/update', data)
+    return request.put('/admin/shop/update', data)
   } else {
     return request.post('/admin/shop/add', data)
   }

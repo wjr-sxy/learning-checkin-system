@@ -83,6 +83,24 @@ public class AdminShopController {
         return Result.success(product);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public Result<String> delete(@PathVariable Long id) {
+        Product product = productService.getById(id);
+        if (product == null) {
+            return Result.error(404, "Product not found");
+        }
+        try {
+            boolean removed = productService.removeById(id);
+            if (removed) {
+                return Result.success("Deleted successfully");
+            } else {
+                return Result.error(500, "Delete failed");
+            }
+        } catch (Exception e) {
+             return Result.error(500, "Cannot delete product: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/status/{id}")
     public Result<String> updateStatus(@PathVariable Long id, @RequestParam Integer status) {
         Product product = productService.getById(id);

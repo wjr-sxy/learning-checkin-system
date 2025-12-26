@@ -15,12 +15,12 @@ import java.util.Map;
 @Mapper
 public interface DailyOnlineStatsMapper extends BaseMapper<DailyOnlineStats> {
 
-    @Update("INSERT INTO sys_daily_online_stats (user_id, stats_date, duration_seconds) " +
-            "VALUES (#{userId}, #{date}, #{seconds}) " +
-            "ON DUPLICATE KEY UPDATE duration_seconds = duration_seconds + #{seconds}")
-    void incrementDuration(@Param("userId") Long userId, @Param("date") LocalDate date, @Param("seconds") Long seconds);
+    @Update("INSERT INTO sys_daily_online_stats (user_id, stats_date, online_seconds, last_active_time) " +
+            "VALUES (#{userId}, #{date}, #{seconds}, #{now}) " +
+            "ON DUPLICATE KEY UPDATE online_seconds = online_seconds + #{seconds}, last_active_time = #{now}")
+    void incrementDuration(@Param("userId") Long userId, @Param("date") LocalDate date, @Param("seconds") Long seconds, @Param("now") java.time.LocalDateTime now);
 
-    @Select("SELECT u.id, u.username, u.full_name, u.avatar, u.college, SUM(s.duration_seconds) as total_seconds " +
+    @Select("SELECT u.id, u.username, u.full_name, u.avatar, u.college, SUM(s.online_seconds) as total_seconds " +
             "FROM sys_user u " +
             "JOIN sys_daily_online_stats s ON u.id = s.user_id " +
             "WHERE u.role = 'TEACHER' AND s.stats_date >= #{startDate} " +

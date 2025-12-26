@@ -14,7 +14,7 @@
             <div class="user-avatar-container" @click="router.push('/profile')" style="cursor: pointer; position: relative; margin-left: 15px; width: 40px; height: 40px;">
               <AvatarFrame 
                 :avatar-url="userStore.user.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'"
-                :frame-url="userStore.user.currentAvatarFrame"
+                :frame-url="userStore.user.currentAvatarFrame || ''"
                 :size="40"
               />
             </div>
@@ -203,19 +203,49 @@ const router = useRouter()
 const joinDialogVisible = ref(false)
 const joinFormRef = ref<FormInstance>()
 let timer: ReturnType<typeof setInterval> | null = null
+let syncTimer: ReturnType<typeof setInterval> | null = null
 
 // Real-time Online Duration
-onMounted(() => {
+onMounted(async () => {
+  // Initial sync with database to get accurate start time
+  await userStore.fetchTodayOnlineTime()
+
+  // Start local ticker (visual only)
   timer = setInterval(() => {
-    userStore.todayOnlineSeconds++
+    // Use store method to update both total and today seconds, and accumulate pending seconds
+    userStore.updateOnlineTime(1)
   }, 1000)
+  
+  // Start heartbeat sync (every 30 seconds)
+  syncTimer = setInterval(() => {
+    userStore.syncOnlineTime()
+  }, 30000)
+  
+  // Load courses
+  loadCourses()
+  
+  // Add beforeunload listener for last-ditch sync
+  window.addEventListener('beforeunload', handleBeforeUnload)
 })
+
+const handleBeforeUnload = () => {
+    userStore.syncOnlineTime()
+}
 
 onUnmounted(() => {
   if (timer) {
     clearInterval(timer)
     timer = null
   }
+  if (syncTimer) {
+    clearInterval(syncTimer)
+    syncTimer = null
+  }
+  
+  // Try one last sync when component unmounts
+  userStore.syncOnlineTime()
+  
+  window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 
 // Online Time
@@ -223,7 +253,8 @@ const formattedTodayOnline = computed(() => {
   const seconds = userStore.todayOnlineSeconds
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
-  return `${hours}h ${minutes}m`
+  const secs = seconds % 60
+  return `${hours}h ${minutes}m ${secs}s`
 })
 
 const showOnlineDetails = () => {
@@ -294,10 +325,6 @@ const handleJoinCourse = async () => {
         }
     })
 }
-
-onMounted(() => {
-    loadCourses()
-})
 </script>
 
 <style scoped>

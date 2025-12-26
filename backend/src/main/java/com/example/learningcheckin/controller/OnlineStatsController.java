@@ -56,13 +56,34 @@ public class OnlineStatsController {
             }
 
             // Update Daily Stats
-            dailyOnlineStatsMapper.incrementDuration(userId, LocalDate.now(ZONE_ID), duration);
+            dailyOnlineStatsMapper.incrementDuration(userId, LocalDate.now(ZONE_ID), duration, LocalDateTime.now(ZONE_ID));
 
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error(500, e.getMessage());
         }
+    }
+
+    @GetMapping("/today")
+    public Result<Long> getTodaySeconds(@RequestParam Long userId) {
+        LocalDate today = LocalDate.now(ZONE_ID);
+        QueryWrapper<DailyOnlineStats> qw = new QueryWrapper<>();
+        qw.eq("user_id", userId).eq("stats_date", today);
+        DailyOnlineStats stats = dailyOnlineStatsMapper.selectOne(qw);
+        
+        if (stats == null) {
+            // Initialize if not exists
+            stats = new DailyOnlineStats();
+            stats.setUserId(userId);
+            stats.setStatsDate(today);
+            stats.setOnlineSeconds(0L);
+            stats.setLastActiveTime(LocalDateTime.now(ZONE_ID));
+            dailyOnlineStatsMapper.insert(stats);
+            return Result.success(0L);
+        }
+        
+        return Result.success(stats.getOnlineSeconds());
     }
 
     @GetMapping("/user")
@@ -79,7 +100,7 @@ public class OnlineStatsController {
         QueryWrapper<DailyOnlineStats> qw = new QueryWrapper<>();
         qw.eq("user_id", userId).eq("stats_date", LocalDate.now(ZONE_ID));
         DailyOnlineStats daily = dailyOnlineStatsMapper.selectOne(qw);
-        data.put("todaySeconds", daily != null ? daily.getDurationSeconds() : 0);
+        data.put("todaySeconds", daily != null ? daily.getOnlineSeconds() : 0);
 
         return Result.success(data);
     }

@@ -15,7 +15,6 @@ public class DailyOnlineStats {
     private Long id;
     private Long userId;
     private LocalDate statsDate;
-    private Long durationSeconds;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+    private Long onlineSeconds;
+    private LocalDateTime lastActiveTime;
 }

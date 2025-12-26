@@ -11,5 +11,6 @@ public interface IFriendService {
     Result<String> deleteFriend(Long userId, Long friendId);
     Result<List<Map<String, Object>>> getFriendList(Long userId);
     Result<List<Map<String, Object>>> getFriendRequests(Long userId);
-    Result<List<User>> searchUsers(String keyword, Long currentUserId);
+    Result<List<User>> searchUsers(String keyword, String college, Long currentUserId);
+    Result<String> remindFriend(Long userId, Long friendId);
 }

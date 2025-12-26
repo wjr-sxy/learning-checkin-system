@@ -182,15 +182,17 @@ const handleFileChange = (uploadFile: any, uploadFiles: any) => {
     if (!isLt5M) {
         ElMessage.error('文件大小不能超过 5MB!')
         // Remove
-        const index = fileList.value.indexOf(uploadFile)
-        if (index !== -1) fileList.value.splice(index, 1)
+        if (fileList.value && Array.isArray(fileList.value)) {
+            const index = fileList.value.indexOf(uploadFile)
+            if (index !== -1) fileList.value.splice(index, 1)
+        }
         return
     }
-    fileList.value = uploadFiles
+    fileList.value = uploadFiles || []
 }
 
 const handleRemove = (_file: any, uploadFiles: any) => {
-    fileList.value = uploadFiles
+    fileList.value = uploadFiles || []
 }
 
 const uploadFileToServer = async (file: File) => {
@@ -200,6 +202,7 @@ const uploadFileToServer = async (file: File) => {
     // Use fetch or axios to upload
     // Here assume we use the global request or fetch
     const token = sessionStorage.getItem('active_token')
+    // Fix: Use /api prefix to go through proxy
     const response = await fetch('/api/tasks/upload', {
         method: 'POST',
         headers: {

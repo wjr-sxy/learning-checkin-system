@@ -34,6 +34,7 @@ let avatarImg: HTMLImageElement | null = null
 let frameImg: HTMLImageElement | null = null
 
 const isVideo = computed(() => {
+  if (!props.frameUrl) return false
   return props.frameUrl.endsWith('.mp4') || props.frameUrl.endsWith('.webm')
 })
 

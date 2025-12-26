@@ -8,6 +8,7 @@ import com.example.learningcheckin.entity.User;
 import com.example.learningcheckin.mapper.FriendRequestMapper;
 import com.example.learningcheckin.mapper.FriendshipMapper;
 import com.example.learningcheckin.mapper.UserMapper;
+import com.example.learningcheckin.service.ICheckinService;
 import com.example.learningcheckin.service.IFriendService;
 import com.example.learningcheckin.websocket.NotificationWebSocket;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ public class FriendServiceImpl implements IFriendService {
     private FriendRequestMapper friendRequestMapper;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private ICheckinService checkinService;
 
     @Override
     @Transactional
@@ -148,7 +152,17 @@ public class FriendServiceImpl implements IFriendService {
             map.put("id", u.getId());
             map.put("username", u.getUsername());
             map.put("fullName", u.getFullName());
+            map.put("college", u.getCollege());
             map.put("avatar", u.getAvatar());
+            map.put("currentAvatarFrame", u.getCurrentAvatarFrame());
+            map.put("isCheckedIn", checkinService.isCheckedIn(u.getId(), LocalDate.now()));
+            
+            boolean isOnline = false;
+            if (u.getLastActiveTime() != null) {
+                isOnline = u.getLastActiveTime().isAfter(LocalDateTime.now().minusMinutes(5));
+            }
+            map.put("isOnline", isOnline);
+            map.put("online", isOnline);
             map.put("lastActiveTime", u.getLastActiveTime());
             return map;
         }).collect(Collectors.toList());
@@ -186,10 +200,13 @@ public class FriendServiceImpl implements IFriendService {
     }
 
     @Override
-    public Result<List<User>> searchUsers(String keyword, Long currentUserId) {
+    public Result<List<User>> searchUsers(String keyword, String college, Long currentUserId) {
         List<User> users = userMapper.selectList(new LambdaQueryWrapper<User>()
                 .ne(User::getId, currentUserId)
-                .and(w -> w.like(User::getUsername, keyword).or().like(User::getFullName, keyword))
+                .and(w -> w.like(User::getUsername, keyword)
+                        .or().like(User::getFullName, keyword)
+                        .or().like(User::getCollege, keyword))
+                .eq(college != null && !college.isEmpty(), User::getCollege, college)
                 .last("LIMIT 20"));
         
         // Mask sensitive info
@@ -199,5 +216,38 @@ public class FriendServiceImpl implements IFriendService {
         });
         
         return Result.success(users);
+    }
+
+    @Override
+    public Result<String> remindFriend(Long userId, Long friendId) {
+        // 1. Check friendship
+        Long count = friendshipMapper.selectCount(new LambdaQueryWrapper<Friendship>()
+                .eq(Friendship::getUserId, userId)
+                .eq(Friendship::getFriendId, friendId));
+        if (count == 0) return Result.error(400, "Not friends");
+
+        // 2. Check if friend checked in
+        boolean checkedIn = checkinService.isCheckedIn(friendId, LocalDate.now());
+        if (checkedIn) return Result.error(400, "Friend already checked in today");
+
+        // 3. Rate limit (Redis)
+        String key = "friend:remind:" + userId + ":" + friendId + ":" + LocalDate.now();
+        Boolean hasReminded = redisTemplate.hasKey(key);
+        if (Boolean.TRUE.equals(hasReminded)) {
+             return Result.error(400, "Already reminded today");
+        }
+
+        // 4. Send Notification
+        User sender = userMapper.selectById(userId);
+        String senderName = (sender.getFullName() != null && !sender.getFullName().isEmpty()) 
+                            ? sender.getFullName() : sender.getUsername();
+        
+        String msg = String.format("{\"type\":\"ALERT\", \"title\":\"好友提醒\", \"content\":\"您的好友 [%s] 提醒您今天还没打卡，快去学习吧！\"}", senderName);
+        NotificationWebSocket.sendInfo(friendId, msg);
+        
+        // Set Redis flag (expire in 24h)
+        redisTemplate.opsForValue().set(key, "1", 24, TimeUnit.HOURS);
+
+        return Result.success("Reminded successfully");
     }
 }

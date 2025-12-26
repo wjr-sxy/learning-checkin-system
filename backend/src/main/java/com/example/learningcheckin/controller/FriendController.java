@@ -50,7 +50,14 @@ public class FriendController {
     }
 
     @GetMapping("/search")
-    public Result<List<User>> searchUsers(@RequestParam String keyword, @RequestParam Long currentUserId) {
-        return friendService.searchUsers(keyword, currentUserId);
+    public Result<List<User>> searchUsers(@RequestParam(defaultValue = "") String keyword, 
+                                          @RequestParam(required = false) String college,
+                                          @RequestParam Long currentUserId) {
+        return friendService.searchUsers(keyword, college, currentUserId);
+    }
+
+    @PostMapping("/remind/{friendId}")
+    public Result<String> remindFriend(@PathVariable Long friendId, @RequestParam Long userId) {
+        return friendService.remindFriend(userId, friendId);
     }
 }
