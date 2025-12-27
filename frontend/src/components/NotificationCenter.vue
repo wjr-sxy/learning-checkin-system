@@ -180,6 +180,14 @@ const connectWebSocket = () => {
                 type: 'success'
             })
             loadNotifications()
+        } else if (data.type === 'REMIND_CHECKIN') {
+            ElNotification({
+                title: data.title || '好友提醒',
+                message: data.content,
+                type: 'warning',
+                duration: 6000
+            })
+            loadNotifications()
         }
       }
     } catch (e) {

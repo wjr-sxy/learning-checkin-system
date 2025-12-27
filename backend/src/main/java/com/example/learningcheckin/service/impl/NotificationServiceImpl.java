@@ -19,7 +19,7 @@ public class NotificationServiceImpl extends ServiceImpl<SysNoticeMapper, SysNot
         notification.setReceiverId(userId);
         notification.setTitle(title);
         notification.setContent(content);
-        notification.setType("NOTIFICATION");
+        notification.setType(type);
         notification.setIsRead(0);
         notification.setCreateTime(LocalDateTime.now());
         this.save(notification);

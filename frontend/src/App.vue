@@ -80,6 +80,13 @@ const connectWebSocket = () => {
                     type: 'error',
                     duration: 0
                 })
+            } else if (data.type === 'REMIND_CHECKIN') {
+                ElNotification({
+                    title: data.title || '好友提醒',
+                    message: data.content,
+                    type: 'warning',
+                    duration: 6000
+                })
             }
         } catch (e) {
             console.error('WS message parse error', e)

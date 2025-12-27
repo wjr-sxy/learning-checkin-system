@@ -2,8 +2,14 @@
   <div class="friends-container">
     <div class="header">
       <div class="header-left">
-        <h2>我的好友</h2>
-        <span class="subtitle">与 {{ friendStore.friends.length }} 位好友一起学习</span>
+        <el-page-header @back="router.push('/dashboard')" class="page-header">
+            <template #content>
+                <div class="header-title-row">
+                    <h2>管理我的学友</h2>
+                    <span class="subtitle">与 {{ friendStore.friends.length }} 位好友一起学习</span>
+                </div>
+            </template>
+        </el-page-header>
       </div>
       <el-button type="primary" class="add-btn" @click="showAddDialog = true">
         <el-icon><Plus /></el-icon> 添加好友
@@ -62,18 +68,18 @@
               <!-- Action Section -->
               <div class="actions-wrapper">
                  <el-tooltip 
-                   :content="friend.isCheckedIn ? '好友今日已打卡' : '提醒好友去打卡'" 
+                   :content="friend.isCheckedIn ? '好友今日已打卡' : (friend.isReminded ? '今日已提醒' : '提醒好友去打卡')" 
                    placement="top"
                  >
                    <el-button 
-                     :type="friend.isCheckedIn ? 'info' : 'primary'" 
-                     :plain="friend.isCheckedIn"
-                     :disabled="friend.isCheckedIn"
+                     :type="(friend.isCheckedIn || friend.isReminded) ? 'info' : 'primary'" 
+                     :plain="friend.isCheckedIn || friend.isReminded"
+                     :disabled="friend.isCheckedIn || friend.isReminded"
                      class="action-btn remind-btn"
                      @click="handleRemind(friend)"
                    >
                      <el-icon class="mr-1"><Bell /></el-icon>
-                     {{ friend.isCheckedIn ? '已打卡' : '催打卡' }}
+                     {{ friend.isCheckedIn ? '今日已学' : (friend.isReminded ? '已提醒' : '催打卡') }}
                    </el-button>
                  </el-tooltip>
                  
@@ -188,12 +194,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useFriendStore } from '../stores/friend'
 import { Plus, Search, User, Message, Delete, Bell, Check } from '@element-plus/icons-vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import AvatarFrame from '@/components/AvatarFrame.vue'
 
+const router = useRouter()
 const friendStore = useFriendStore()
 const activeTab = ref('list')
 const showAddDialog = ref(false)
@@ -237,12 +245,27 @@ const handleSearch = async () => {
 }
 
 const handleRemind = (friend: any) => {
-  if (friend.isCheckedIn) return
+  if (friend.isCheckedIn || friend.isReminded) return
+  console.log('Reminding friend:', friend.id)
   friendStore.remindFriend(friend.id)
+    .then(() => {
+        console.log('Remind success')
+        ElMessage.success('催促成功！已通过系统消息提醒好友。')
+        friend.isReminded = true
+    })
+    .catch((error: any) => {
+        console.error('Remind error:', error)
+        const msg = error.response?.data?.message || error.message || '提醒失败'
+        ElMessage.error(msg)
+    })
 }
 
 const confirmDelete = (friend: any) => {
     friendStore.deleteFriend(friend.id)
+}
+
+const goBack = () => {
+    router.push('/dashboard')
 }
 
 onMounted(() => {
@@ -253,7 +276,7 @@ onMounted(() => {
 
 <style scoped>
 .friends-container {
-  padding: 24px;
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
   min-height: 80vh;
@@ -264,6 +287,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 24px;
+}
+
+.header-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
 }
 
 .header h2 {
@@ -305,26 +334,18 @@ onMounted(() => {
 }
 
 .friend-card {
-    border: none;
-    background: var(--bg-color-white);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: visible;
+  transition: all 0.3s;
 }
 
 .friend-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px var(--shadow-color-base);
-    z-index: 1;
+  transform: translateY(-5px);
 }
 
 .card-content {
-  padding: 20px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 16px;
+  padding: 20px;
+  gap: 20px;
 }
 
 .avatar-wrapper {

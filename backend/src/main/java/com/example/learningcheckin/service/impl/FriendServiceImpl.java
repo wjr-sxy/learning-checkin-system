@@ -38,6 +38,8 @@ public class FriendServiceImpl implements IFriendService {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ICheckinService checkinService;
+    @Autowired
+    private com.example.learningcheckin.service.INotificationService notificationService;
 
     @Override
     @Transactional
@@ -242,8 +244,14 @@ public class FriendServiceImpl implements IFriendService {
         String senderName = (sender.getFullName() != null && !sender.getFullName().isEmpty()) 
                             ? sender.getFullName() : sender.getUsername();
         
-        String msg = String.format("{\"type\":\"ALERT\", \"title\":\"好友提醒\", \"content\":\"您的好友 [%s] 提醒您今天还没打卡，快去学习吧！\"}", senderName);
+        String msgContent = String.format("您的好友 [%s] 提醒您今天还没打卡，快去学习吧！", senderName);
+        String msg = String.format("{\"type\":\"REMIND_CHECKIN\", \"title\":\"好友提醒\", \"content\":\"%s\"}", msgContent);
+        
+        // Push real-time notification
         NotificationWebSocket.sendInfo(friendId, msg);
+        
+        // Persist notification
+        notificationService.sendNotification(friendId, "好友提醒", msgContent, "REMIND_CHECKIN");
         
         // Set Redis flag (expire in 24h)
         redisTemplate.opsForValue().set(key, "1", 24, TimeUnit.HOURS);

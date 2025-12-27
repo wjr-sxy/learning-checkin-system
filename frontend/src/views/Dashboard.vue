@@ -168,6 +168,7 @@ import dayjs from 'dayjs'
 
 import OnlineUserList from '../components/OnlineUserList.vue'
 import ChatRoom from '../components/ChatRoom.vue'
+import NotificationCenter from '../components/NotificationCenter.vue'
 import AccountSwitcher from '../components/AccountSwitcher.vue'
 
 const userStore = useUserStore()

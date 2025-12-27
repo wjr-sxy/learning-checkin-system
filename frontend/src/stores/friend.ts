@@ -102,15 +102,14 @@ export const useFriendStore = defineStore('friend', () => {
     }
 
     const remindFriend = async (friendId: number) => {
-        if (!userStore.user) return
-        try {
-            await axios.post(`${BASE_URL}/remind/${friendId}`, null, {
-                params: { userId: userStore.user.id }
-            })
-            ElMessage.success('已发送提醒')
-        } catch (error: any) {
-            ElMessage.error(error.response?.data?.message || '提醒失败')
+        if (!userStore.user) return Promise.reject('User not logged in')
+        const res = await axios.post(`${BASE_URL}/remind/${friendId}`, null, {
+            params: { userId: userStore.user.id }
+        })
+        if (res.data.code !== 200) {
+            throw new Error(res.data.message || '操作失败')
         }
+        return res.data
     }
 
     return {
