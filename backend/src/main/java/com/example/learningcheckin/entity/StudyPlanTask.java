@@ -19,5 +19,12 @@ public class StudyPlanTask {
     private Integer priority; // Priority
     private LocalDate deadline;
     private Integer status; // 0: Pending, 1: Completed
+    
+    // New Fields
+    private String type; // VIDEO, READING, HOMEWORK, QUIZ, CUSTOM
+    private Integer targetValue; // Target Value
+    private Integer currentValue; // Current Progress
+    private String resourceUrl; // Resource URL
+    
     private LocalDateTime createTime;
 }

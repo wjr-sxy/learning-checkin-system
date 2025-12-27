@@ -7,12 +7,14 @@ import com.example.learningcheckin.entity.Order;
 import com.example.learningcheckin.entity.PointsRecord;
 import com.example.learningcheckin.entity.Product;
 import com.example.learningcheckin.entity.User;
+import com.example.learningcheckin.event.ProductExchangeEvent;
 import com.example.learningcheckin.mapper.OrderMapper;
 import com.example.learningcheckin.mapper.PointsRecordMapper;
 import com.example.learningcheckin.mapper.ProductMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import com.example.learningcheckin.service.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Autowired
     private PointsRecordMapper pointsRecordMapper;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<Product> getProducts() {
@@ -174,6 +179,9 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             record.setDescription("Exchange Product: " + product.getName());
             record.setCreateTime(LocalDateTime.now());
             pointsRecordMapper.insert(record);
+
+            // 7. Publish Event
+            eventPublisher.publishEvent(new ProductExchangeEvent(this, userId, productId, order.getId(), finalPrice));
 
         } finally {
             if (locked && clientId.equals(redisTemplate.opsForValue().get(lockKey))) {

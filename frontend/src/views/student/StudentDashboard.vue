@@ -30,133 +30,111 @@
 
     <el-main class="container">
       <div class="student-dashboard">
-        <!-- Welcome Section -->
-        <div class="welcome-section mb-5">
-          <div class="welcome-card">
-            <div class="welcome-content">
-              <h1>欢迎回来，{{ userStore.user?.username }}!</h1>
-              <p class="welcome-subtitle">继续你的学习之旅，今天也要加油哦！</p>
-              <div class="welcome-stats">
-                <div class="stat-item">
-                  <div class="stat-value">{{ userStore.user?.continuousCheckinDays || 0 }}</div>
-                  <div class="stat-label">连续打卡天数</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                  <div class="stat-value">{{ userStore.user?.points || 0 }}</div>
-                  <div class="stat-label">总积分</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item" @click="showOnlineDetails" style="cursor: pointer">
-                  <div class="stat-value">{{ formattedTodayOnline }}</div>
-                  <div class="stat-label">今日在线</div>
-                </div>
-                <div class="stat-divider"></div>
-                <div class="stat-item">
-                  <div class="stat-value">{{ courses.length }}</div>
-                  <div class="stat-label">已加入课程</div>
-                </div>
-              </div>
-            </div>
-            <div class="welcome-actions">
-              <el-button type="primary" size="large" @click="joinDialogVisible = true">
-                <el-icon><Plus /></el-icon>
-                加入课程
-              </el-button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="quick-actions-section mb-5">
-          <h2 class="section-title">快捷操作</h2>
-          <el-row :gutter="20">
-            <el-col :xs="24" :sm="12" :md="6" class="mb-4">
-              <el-card shadow="hover" @click="router.push('/study-plan')" class="action-card card-hover">
-                <div class="card-content">
-                  <div class="action-icon-wrapper study-plan-icon">
-                    <el-icon size="48"><List /></el-icon>
+        <el-row :gutter="20">
+            <!-- Left Column: Main Content -->
+            <el-col :span="18">
+                <!-- Welcome Section -->
+                <div class="welcome-section mb-5">
+                  <div class="welcome-card">
+                    <div class="welcome-content">
+                      <h1>欢迎回来，{{ userStore.user?.username }}!</h1>
+                      <p class="welcome-subtitle">继续你的学习之旅，今天也要加油哦！</p>
+                      <div class="welcome-stats">
+                        <div class="stat-item">
+                          <div class="stat-value">{{ userStore.user?.continuousCheckinDays || 0 }}</div>
+                          <div class="stat-label">连续打卡天数</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                          <div class="stat-value">{{ userStore.user?.points || 0 }}</div>
+                          <div class="stat-label">总积分</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item" @click="showOnlineDetails" style="cursor: pointer">
+                          <div class="stat-value">{{ formattedTodayOnline }}</div>
+                          <div class="stat-label">今日在线</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                          <div class="stat-value">{{ courses.length }}</div>
+                          <div class="stat-label">已加入课程</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="welcome-actions">
+                      <el-button type="primary" size="large" @click="joinDialogVisible = true">
+                        <el-icon><Plus /></el-icon>
+                        加入课程
+                      </el-button>
+                    </div>
                   </div>
-                  <h3>学习计划</h3>
-                  <p>管理你的学习进度</p>
                 </div>
-              </el-card>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="6" class="mb-4">
-              <el-card shadow="hover" @click="router.push('/checkin')" class="action-card card-hover">
-                <div class="card-content">
-                  <div class="action-icon-wrapper checkin-icon">
-                    <el-icon size="48"><Calendar /></el-icon>
-                  </div>
-                  <h3>每日打卡</h3>
-                  <p>记录你的学习时间</p>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="6" class="mb-4">
-              <el-card shadow="hover" @click="router.push('/leaderboard')" class="action-card card-hover">
-                <div class="card-content">
-                  <div class="action-icon-wrapper leaderboard-icon">
-                    <el-icon size="48"><Trophy /></el-icon>
-                  </div>
-                  <h3>排行榜</h3>
-                  <p>查看你的排名</p>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="6" class="mb-4">
-              <el-card shadow="hover" @click="router.push('/shop')" class="action-card card-hover">
-                <div class="card-content">
-                  <div class="action-icon-wrapper shop-icon">
-                    <el-icon size="48"><Shop /></el-icon>
-                  </div>
-                  <h3>积分商城</h3>
-                  <p>兑换精美礼品</p>
-                </div>
-              </el-card>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="6" class="mb-4">
-              <el-card shadow="hover" @click="router.push('/friends')" class="action-card card-hover">
-                <div class="card-content">
-                  <div class="action-icon-wrapper friends-icon">
-                    <el-icon size="48"><User /></el-icon>
-                  </div>
-                  <h3>好友系统</h3>
-                  <p>查看好友与请求</p>
-                </div>
-              </el-card>
-            </el-col>
-          </el-row>
-        </div>
 
-        <!-- Teacher Tasks -->
-        <TeacherTasks class="mb-5" />
-
-        <!-- Course List -->
-        <div class="my-courses-section">
-          <div class="section-header flex-between">
-            <h2 class="section-title">我的课程</h2>
-            <el-text type="secondary" size="small">{{ courses.length }} 门课程</el-text>
-          </div>
-          <el-empty v-if="!courses.length" description="暂未加入任何课程" />
-          <el-row v-else :gutter="20">
-            <el-col :xs="24" :sm="12" :md="8" v-for="course in courses" :key="course.id" class="mb-4">
-              <el-card shadow="hover" class="course-card card-hover">
-                <template #header>
-                  <div class="card-header flex-between">
-                    <h3 class="course-name">{{ course.name }}</h3>
-                  </div>
-                </template>
-                <div class="course-content">
-                  <p class="course-description">{{ course.description || '暂无描述' }}</p>
-                  <div class="course-footer">
-                    <el-tag size="small" type="info" effect="light">课程码: {{ course.code }}</el-tag>
-                  </div>
+                <!-- Teacher Tasks (Optimized) -->
+                <TeacherTasks class="mb-5" />
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions-section mb-5">
+                  <h2 class="section-title">快捷操作</h2>
+                  <el-row :gutter="20">
+                    <el-col :span="6" class="mb-4">
+                      <el-card shadow="hover" @click="router.push('/study-plan')" class="action-card card-hover">
+                        <div class="card-content">
+                          <div class="action-icon-wrapper study-plan-icon">
+                            <el-icon size="32"><List /></el-icon>
+                          </div>
+                          <h3>学习计划</h3>
+                        </div>
+                      </el-card>
+                    </el-col>
+                    <el-col :span="6" class="mb-4">
+                      <el-card shadow="hover" @click="router.push('/checkin')" class="action-card card-hover">
+                        <div class="card-content">
+                          <div class="action-icon-wrapper checkin-icon">
+                            <el-icon size="32"><Calendar /></el-icon>
+                          </div>
+                          <h3>每日打卡</h3>
+                        </div>
+                      </el-card>
+                    </el-col>
+                    <el-col :span="6" class="mb-4">
+                      <el-card shadow="hover" @click="router.push('/shop')" class="action-card card-hover">
+                        <div class="card-content">
+                          <div class="action-icon-wrapper shop-icon">
+                            <el-icon size="32"><Shop /></el-icon>
+                          </div>
+                          <h3>积分商城</h3>
+                        </div>
+                      </el-card>
+                    </el-col>
+                    <el-col :span="6" class="mb-4">
+                      <el-card shadow="hover" @click="router.push('/leaderboard')" class="action-card card-hover">
+                        <div class="card-content">
+                          <div class="action-icon-wrapper leaderboard-icon">
+                            <el-icon size="32"><Trophy /></el-icon>
+                          </div>
+                          <h3>排行榜</h3>
+                        </div>
+                      </el-card>
+                    </el-col>
+                  </el-row>
                 </div>
-              </el-card>
             </el-col>
-          </el-row>
-        </div>
+            
+            <!-- Right Column: Stats & Achievements -->
+            <el-col :span="6">
+                <!-- Capability Radar -->
+                <el-card class="mb-4" shadow="never">
+                    <template #header>
+                        <div class="font-bold">能力维度</div>
+                    </template>
+                    <div ref="radarChart" style="height: 250px;"></div>
+                </el-card>
+
+                <!-- Achievement Wall -->
+                <AchievementWall />
+            </el-col>
+        </el-row>
       </div>
       
       <!-- Join Course Dialog -->
@@ -186,17 +164,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, reactive, computed } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, computed, nextTick } from 'vue'
 import { useUserStore } from '../../stores/user'
 import { useRouter } from 'vue-router'
 import { Coin, List, Calendar, Shop, Trophy, Plus, User } from '@element-plus/icons-vue'
 import { joinCourse, getStudentCourses } from '../../api/course'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import TeacherTasks from './TeacherTasks.vue'
 import AccountSwitcher from '../../components/AccountSwitcher.vue'
 import NotificationCenter from '../../components/NotificationCenter.vue'
 import AvatarFrame from '../../components/AvatarFrame.vue'
+import AchievementWall from '../../components/AchievementWall.vue'
+import * as echarts from 'echarts'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -204,6 +184,7 @@ const joinDialogVisible = ref(false)
 const joinFormRef = ref<FormInstance>()
 let timer: ReturnType<typeof setInterval> | null = null
 let syncTimer: ReturnType<typeof setInterval> | null = null
+const radarChart = ref<HTMLElement>()
 
 // Real-time Online Duration
 onMounted(async () => {
@@ -224,9 +205,64 @@ onMounted(async () => {
   // Load courses
   loadCourses()
   
+  // Init Chart
+  initRadarChart()
+  
   // Add beforeunload listener for last-ditch sync
   window.addEventListener('beforeunload', handleBeforeUnload)
 })
+
+const initRadarChart = () => {
+    if (!radarChart.value) return
+    const myChart = echarts.init(radarChart.value)
+    const option = {
+        radar: {
+            indicator: [
+                { name: '视频学习', max: 100 },
+                { name: '作业提交', max: 100 },
+                { name: '测验', max: 100 },
+                { name: '打卡', max: 100 },
+                { name: '互动', max: 100 }
+            ],
+            splitNumber: 4,
+            axisName: {
+                color: '#999'
+            },
+            splitArea: {
+                areaStyle: {
+                    color: ['#f8f9fa', '#fff'],
+                    shadowColor: 'rgba(0, 0, 0, 0.1)',
+                    shadowBlur: 10
+                }
+            }
+        },
+        series: [
+            {
+                name: '能力维度',
+                type: 'radar',
+                data: [
+                    {
+                        value: [80, 50, 60, 90, 40], // Mock Data
+                        name: '我的数据',
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(64, 158, 255, 0.5)' },
+                                { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+                            ])
+                        },
+                        itemStyle: {
+                            color: '#409EFF'
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+    myChart.setOption(option)
+    
+    // Responsive resize
+    window.addEventListener('resize', () => myChart.resize())
+}
 
 const handleBeforeUnload = () => {
     userStore.syncOnlineTime()
@@ -343,24 +379,6 @@ const handleJoinCourse = async () => {
   gap: 15px;
 }
 
-.user-dropdown-link {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 8px;
-}
-
-.avatar-wrapper {
-  position: relative;
-  width: 40px;
-  height: 40px;
-}
-
-.username {
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
 .points-badge {
   display: flex;
   align-items: center;
@@ -376,7 +394,7 @@ const handleJoinCourse = async () => {
 
 /* Welcome Section */
 .welcome-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .welcome-card {
@@ -484,7 +502,7 @@ const handleJoinCourse = async () => {
 
 /* Quick Actions */
 .quick-actions-section {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .action-card {
@@ -505,13 +523,13 @@ const handleJoinCourse = async () => {
 }
 
 .action-icon-wrapper {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   background: var(--bg-color-base);
   transition: all 0.3s ease;
 }
@@ -541,30 +559,14 @@ const handleJoinCourse = async () => {
   color: #C2185B;
 }
 
-.friends-icon {
-  background: linear-gradient(135deg, #FDE6E6 0%, #F5C6C6 100%);
-  color: #F56C6C;
-}
-
 .action-card h3 {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.action-card p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
 /* Courses Section */
-.section-header {
-  margin-bottom: 20px;
-}
-
 .course-card {
   height: 100%;
   border-radius: 12px;
@@ -592,10 +594,6 @@ const handleJoinCourse = async () => {
   text-overflow: ellipsis;
 }
 
-.course-footer {
-  margin-top: auto;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   .welcome-card {
@@ -610,49 +608,6 @@ const handleJoinCourse = async () => {
   .welcome-actions {
     width: 100%;
     justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .welcome-card {
-    padding: 24px;
-  }
-  
-  .welcome-content h1 {
-    font-size: 24px;
-  }
-  
-  .welcome-stats {
-    gap: 20px;
-  }
-  
-  .stat-value {
-    font-size: 24px;
-  }
-  
-  .section-title {
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 576px) {
-  .welcome-stats {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .stat-divider {
-    display: none;
-  }
-  
-  .action-icon-wrapper {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 12px;
-  }
-  
-  .action-icon-wrapper .el-icon {
-    font-size: 32px !important;
   }
 }
 </style>

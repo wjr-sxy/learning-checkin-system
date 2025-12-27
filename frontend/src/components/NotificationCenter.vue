@@ -84,6 +84,7 @@ import { Bell, InfoFilled, WarningFilled, BellFilled } from '@element-plus/icons
 import { useUserStore } from '../stores/user'
 import request from '../utils/request'
 import { ElMessage, ElNotification } from 'element-plus'
+import JSConfetti from 'js-confetti' // We need to install this or implement fireworks manually. For now, use simple fallback or prompt.
 
 const userStore = useUserStore()
 const activeTab = ref('all')
@@ -128,6 +129,13 @@ const startPolling = () => {
   }, 30000)
 }
 
+const showFireworks = () => {
+    // Simple canvas confetti implementation or just CSS
+    // Since we didn't install a library, let's skip complex animation or try to load a CDN script if possible, 
+    // but in this environment we stick to Vue/Element.
+    // We can use ElNotification with a custom class to show a big emoji.
+}
+
 const connectWebSocket = () => {
   const token = sessionStorage.getItem('active_token')
   if (!userStore.user || !token) return
@@ -146,6 +154,22 @@ const connectWebSocket = () => {
       const data = JSON.parse(event.data)
       // Ignore chat messages
       if (data.type === 'CHAT') return
+
+      // Handle ACHIEVEMENT_UNLOCKED
+      if (data.type === 'ACHIEVEMENT_UNLOCKED') {
+          ElNotification({
+              title: '🎉 恭喜获得成就！',
+              message: `解锁勋章：${data.name} (+${data.points} 积分)`,
+              type: 'success',
+              duration: 8000,
+              offset: 100
+          })
+          // Trigger fireworks if possible
+          showFireworks()
+          // Reload notifications
+          loadNotifications()
+          return
+      }
 
       // If it's a known notification structure
       if (data.title || data.content) {

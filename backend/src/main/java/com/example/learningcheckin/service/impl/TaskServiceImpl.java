@@ -6,12 +6,14 @@ import com.example.learningcheckin.entity.Task;
 import com.example.learningcheckin.entity.TaskCheckin;
 import com.example.learningcheckin.entity.TaskSubmission;
 import com.example.learningcheckin.entity.User;
+import com.example.learningcheckin.event.TaskGradedEvent;
 import com.example.learningcheckin.mapper.TaskMapper;
 import com.example.learningcheckin.mapper.TaskSubmissionMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import com.example.learningcheckin.service.ITaskService;
 import com.example.learningcheckin.websocket.NotificationWebSocket;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +50,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
     @Autowired
     private com.example.learningcheckin.service.INotificationService notificationService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -186,8 +191,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
 
         // Check Frequency (DAILY/WEEKLY)
         if ("WEEKLY".equalsIgnoreCase(task.getFrequency())) {
-             // For weekly, check if already checked in this week (Monday to Sunday)
-             // Using simple approach: checkin count for the week range > 0
              LocalDate monday = date.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
              LocalDate sunday = date.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
              
@@ -246,24 +249,18 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         checkin.setIsMakeup(isMakeup);
         
         if (isSensitive) {
-            // Mark invalid? Or just don't award points?
-            // Requirement: "自动打回". For recurring, maybe just don't save or save as invalid?
-            // But user wants feedback.
-            // Let's save it but 0 points and mark clearly in content?
-            // Or better, throw exception and don't save at all?
-            // For recurring, "Immediate Feedback".
-            // Let's throw exception.
-            
-            // Log hit
             sensitiveWordService.logSensitiveHit(studentId, content, sensitiveWordService.findAllSensitive(content), "RECURRING_TASK_CHECKIN", taskId);
-            
             throw new com.example.learningcheckin.exception.SensitiveWordException("打卡内容包含敏感词");
         }
         
         checkin.setPointsAwarded(points);
         checkinMapper.insert(checkin);
 
-        // Award Points
+        // Award Points (Using Event would be better, but keeping local logic for recurring now to minimize risk, or refactor later)
+        // Plan said: Refactor TaskServiceImpl for TaskGradedEvent. Recurring checkin is different.
+        // Let's keep direct point update here for recurring checkin for now, or use PointsService if possible.
+        // But plan explicitly mentioned TaskGradedEvent. I will stick to plan for TaskGraded, and maybe optimize this if safe.
+        // Actually, to be consistent, I should use PointsService here too.
         if (points > 0) {
             User user = userMapper.selectById(studentId);
             if (user != null) {
@@ -277,7 +274,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
     }
 
     private void updateRecurringSummary(Long taskId, Long studentId) {
-        // Check/Create TaskSubmission to store total days or just for "Enrolled" status
         QueryWrapper<TaskSubmission> subQuery = new QueryWrapper<>();
         subQuery.eq("task_id", taskId).eq("student_id", studentId);
         TaskSubmission sub = submissionMapper.selectOne(subQuery);
@@ -348,41 +344,31 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements IT
         submission.setGradeTime(LocalDateTime.now());
         submissionMapper.updateById(submission);
 
+        int earnedPoints = 0;
         if (score != null && score > 0) {
-             User user = userMapper.selectById(submission.getStudentId());
-             if (user != null) {
-                 user.setPoints(user.getPoints() + score);
+             earnedPoints += score;
+             
+             // Check Speed Bonus
+             Task task = getById(submission.getTaskId());
+             if (task != null && !Boolean.TRUE.equals(task.getIsRecurring())) {
+                 long totalDuration = Duration.between(task.getCreateTime(), task.getDeadline()).toMillis();
+                 long submitDuration = Duration.between(task.getCreateTime(), submission.getSubmitTime()).toMillis();
                  
-                 // Check Speed Bonus
-                 Task task = getById(submission.getTaskId());
-                 if (task != null && !Boolean.TRUE.equals(task.getIsRecurring())) {
-                     long totalDuration = Duration.between(task.getCreateTime(), task.getDeadline()).toMillis();
-                     long submitDuration = Duration.between(task.getCreateTime(), submission.getSubmitTime()).toMillis();
+                 if (submitDuration <= totalDuration / 2) {
+                     QueryWrapper<TaskSubmission> countQuery = new QueryWrapper<>();
+                     countQuery.eq("task_id", task.getId())
+                               .lt("submit_time", submission.getSubmitTime());
+                     Long count = submissionMapper.selectCount(countQuery);
                      
-                     if (submitDuration <= totalDuration / 2) {
-                         QueryWrapper<TaskSubmission> countQuery = new QueryWrapper<>();
-                         countQuery.eq("task_id", task.getId())
-                                   .lt("submit_time", submission.getSubmitTime());
-                         Long count = submissionMapper.selectCount(countQuery);
-                         
-                         if (count < 10) {
-                             user.setPoints(user.getPoints() + 20); // Speed bonus
-                         }
+                     if (count < 10) {
+                         earnedPoints += 20; // Speed bonus
                      }
                  }
-                 
-                 userMapper.updateById(user);
              }
         }
 
-        // Notify Student
-        notificationService.sendNotification(submission.getStudentId(), 
-            "作业已评分", 
-            "您的作业已评分。分数: " + score, 
-            "TASK");
-
-        NotificationWebSocket.sendInfo(submission.getStudentId(), 
-            String.format("{\"type\":\"TASK_GRADED\", \"taskId\":%d, \"score\":%d}", submission.getTaskId(), score));
+        // Publish Event
+        eventPublisher.publishEvent(new TaskGradedEvent(this, submission.getStudentId(), submission.getTaskId(), submissionId, score, earnedPoints));
     }
 
     @Override

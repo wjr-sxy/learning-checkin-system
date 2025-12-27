@@ -1,7 +1,6 @@
 package com.example.learningcheckin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.learningcheckin.dto.TrendPointDTO;
 import com.example.learningcheckin.entity.PointsRecord;

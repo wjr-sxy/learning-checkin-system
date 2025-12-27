@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.learningcheckin.entity.Checkin;
 import com.example.learningcheckin.entity.User;
+import com.example.learningcheckin.event.CheckinEvent;
 import com.example.learningcheckin.mapper.CheckinMapper;
 import com.example.learningcheckin.mapper.UserMapper;
 import com.example.learningcheckin.service.ICheckinService;
 import com.example.learningcheckin.service.IPointsService;
 import com.example.learningcheckin.service.IStudyPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,9 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
 
     @Autowired
     private IStudyPlanService studyPlanService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public boolean isCheckedIn(Long userId, LocalDate date) {
@@ -60,8 +65,8 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
         // 2. Update Continuous Days and Last Check-in Date
         updateContinuousDays(userId);
 
-        // 3. Add Points (10 points)
-        pointsService.addPoints(userId, 10, "每日打卡");
+        // 3. Publish Event (Points and Notifications handled by Listeners)
+        eventPublisher.publishEvent(new CheckinEvent(this, userId, today, 10, false));
 
         // 4. Update Study Plan Progress
         studyPlanService.updateAllPlansProgress(userId);
@@ -94,7 +99,7 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
             throw new RuntimeException("本月补卡次数已用完");
         }
 
-        // Deduct 20 points
+        // Deduct 20 points (Cost) - kept in service for validation logic
         pointsService.deductPoints(userId, 20, "补卡: " + date.toString());
 
         // Create Checkin
@@ -109,6 +114,9 @@ public class CheckinServiceImpl extends ServiceImpl<CheckinMapper, Checkin> impl
 
         // Recalculate continuous days
         updateContinuousDays(userId);
+
+        // Publish Event (Makeup)
+        eventPublisher.publishEvent(new CheckinEvent(this, userId, date, 0, true));
 
         // Update Study Plan Progress
         studyPlanService.updateAllPlansProgress(userId);

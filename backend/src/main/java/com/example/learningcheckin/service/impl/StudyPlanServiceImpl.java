@@ -2,11 +2,15 @@ package com.example.learningcheckin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.learningcheckin.dto.StudyPlanTaskProgressRequest;
 import com.example.learningcheckin.entity.*;
+import com.example.learningcheckin.event.TaskCompletedEvent;
 import com.example.learningcheckin.mapper.*;
+import com.example.learningcheckin.service.ILearningLogService;
 import com.example.learningcheckin.service.IStudyPlanService;
 import com.example.learningcheckin.service.IPointsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +43,12 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
     
     @Autowired
     private com.example.learningcheckin.mapper.CheckinMapper checkinMapper;
+
+    @Autowired
+    private ILearningLogService learningLogService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<StudyPlan> getUserPlans(Long userId) {
@@ -272,6 +282,62 @@ public class StudyPlanServiceImpl extends ServiceImpl<StudyPlanMapper, StudyPlan
             taskMapper.updateById(task);
             refreshPlanProgress(task.getPlanId());
         }
+        return task;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public StudyPlanTask updateTaskProgress(Long taskId, StudyPlanTaskProgressRequest request) {
+        StudyPlanTask task = taskMapper.selectById(taskId);
+        if (task == null) {
+            throw new RuntimeException("Task not found");
+        }
+
+        StudyPlan plan = this.getById(task.getPlanId());
+        if (plan == null) {
+            throw new RuntimeException("Plan not found");
+        }
+
+        // Security check for duration (e.g. max 4 hours per request)
+        if (request.getDuration() != null && request.getDuration() > 14400) {
+            throw new RuntimeException("Duration abnormal");
+        }
+
+        // Update Progress
+        int current = task.getCurrentValue() != null ? task.getCurrentValue() : 0;
+        int target = task.getTargetValue() != null ? task.getTargetValue() : 1;
+        
+        if (Boolean.TRUE.equals(request.getIsIncremental())) {
+            current += request.getProgress() != null ? request.getProgress() : 0;
+        } else {
+            current = request.getProgress() != null ? request.getProgress() : current;
+        }
+        
+        task.setCurrentValue(current);
+        
+        // Check completion
+        boolean justCompleted = false;
+        if (current >= target && (task.getStatus() == null || task.getStatus() == 0)) {
+            task.setStatus(1);
+            justCompleted = true;
+        } else if (current < target) {
+            task.setStatus(0);
+        }
+        
+        taskMapper.updateById(task);
+
+        // Log Activity
+        learningLogService.logActivity(plan.getUserId(), taskId, task.getType(), request.getDuration(), 
+            "Progress: " + current + "/" + target);
+
+        // Refresh Plan Progress
+        refreshPlanProgress(plan.getId());
+
+        // Publish Event if completed
+        if (justCompleted) {
+            eventPublisher.publishEvent(new TaskCompletedEvent(this, plan.getUserId(), taskId, task.getType()));
+        }
+
         return task;
     }
 
